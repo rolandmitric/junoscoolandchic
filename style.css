@@ -1,0 +1,62 @@
+body {
+  font-family: 'Raleway', sans-serif;
+  margin: 0;
+  padding: 0;
+  background: #fffafc;
+  color: #333;
+}
+
+header {
+  background: linear-gradient(to right, #ffc0cb, #ffe4e1);
+  text-align: center;
+  padding: 2rem 1rem;
+}
+
+header h1 {
+  font-family: 'Pacifico', cursive;
+  font-size: 3rem;
+  margin: 0;
+  color: #d6336c;
+}
+
+header h1 span {
+  color: #333;
+}
+
+.tagline {
+  font-style: italic;
+  margin-top: 0.5rem;
+  color: #666;
+}
+
+main {
+  max-width: 700px;
+  margin: 2rem auto;
+  padding: 1rem;
+}
+
+.journal-entry {
+  margin-bottom: 2rem;
+  padding: 1rem;
+  border: 2px dashed #ffc0cb;
+  background: #fff0f5;
+  border-radius: 1rem;
+}
+
+.journal-entry h2 {
+  margin-top: 0;
+}
+
+.journal-entry img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  margin-top: 1rem;
+}
+
+footer {
+  text-align: center;
+  padding: 1rem;
+  font-size: 0.9rem;
+  color: #999;
+}

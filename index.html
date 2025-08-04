@@ -1,0 +1,577 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>cool&chic ✨</title>
+  <style>
+    body {
+      font-family: "Comic Sans MS", cursive;
+      background: #fffaf5;
+      color: #333;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background: #fce4ec;
+      padding: 20px;
+      text-align: center;
+      border-bottom: 4px solid #e91e63;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 3em;
+      color: #e91e63;
+    }
+
+    nav {
+      background: #f8bbd0;
+      padding: 10px;
+      text-align: center;
+      border-bottom: 2px solid #e91e63;
+      position: sticky;
+      top: 0;
+      z-index: 999;
+    }
+    nav ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: inline-flex;
+      gap: 20px;
+    }
+    nav ul li a {
+      text-decoration: none;
+      color: #d81b60;
+      font-weight: bold;
+    }
+
+    main {
+      padding: 20px;
+    }
+
+    .journal-section {
+      margin-bottom: 40px;
+    }
+
+    .journal-section h2 {
+      color: #d81b60;
+    }
+
+    .fashion-sketches {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .digital-journal {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+    }
+
+    .digital-journal img {
+      max-width: 200px;
+      border: 2px solid #e91e63;
+      border-radius: 10px;
+      box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+      cursor: zoom-in;
+    }
+
+    canvas {
+      display: block;
+      margin: 10px auto;
+      border: 2px solid #e91e63;
+      background: #fff;
+      max-width: 100%;
+      height: auto;
+    }
+
+    .symmetry-container {
+      text-align: center;
+    }
+
+    .symmetry-modes {
+      display: flex;
+      flex-direction: column;
+      gap: 40px;
+    }
+
+    #math-game {
+      background: #f8bbd0;
+      padding: 20px;
+      border-radius: 20px;
+      max-width: 600px;
+      margin: 20px auto;
+      text-align: center;
+      display: none;
+    }
+
+    #grid-container {
+      display: flex;
+      justify-content: center;
+      margin: 20px 0;
+    }
+
+    #grid {
+      display: grid;
+      grid-template-columns: repeat(10, 24px);
+      grid-template-rows: repeat(2, 24px);
+      gap: 6px;
+    }
+
+    .cell {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #eee;
+      border: none;
+      cursor: pointer;
+      box-sizing: border-box;
+    }
+
+    #grid > * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    .red { background: crimson !important; }
+    .blue { background: royalblue !important; }
+    
+  #zoomModal {
+  display: none;
+  position: fixed;
+  z-index: 9999;
+  left: 0; top: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(0, 0, 0, 0.8);
+  align-items: center;
+  justify-content: center;
+}
+
+#zoomModal img {
+  max-width: 90%;
+  max-height: 90%;
+  border: 4px solid white;
+  border-radius: 12px;
+}
+
+  </style>
+  
+</head>
+<body>
+  <header>
+    <h1>Junos Cool&Chic 💅</h1>
+    <p>Das fantastische Tagebuch für Mode und Spaß – jetzt auch mit Mathe!</p>
+  </header>
+  <nav>
+    <ul>
+      <li><a href="#fashion">👗 Entwürfe</a></li>
+      <li><a href="#journal">📖 Hefte</a></li>
+      <li><a href="#math">🧠 Mathe-Spiel</a></li>
+      <li><a href="#symmetry">🎀 Symmetrie</a></li>
+      <li><a href="#pong">🎯 Pong Hau K’i</a></li>
+    </ul>
+  </nav>
+  <main>
+  <section class="journal-section" id="fashion"> 
+      <h2>Meine ersten Modellentwürfe</h2>
+      <div class="fashion-sketches">
+        <img src="https://cdn.glitch.global/3d242914-de51-45a7-a32b-6aed16315438/entwurf3.jpg?v=1749474999922" alt="Entwurf 1" />
+        <img src="https://cdn.glitch.global/3d242914-de51-45a7-a32b-6aed16315438/entwurf2.jpg?v=1749474994522" alt="Entwurf 2" />
+        <img src="https://cdn.glitch.global/3d242914-de51-45a7-a32b-6aed16315438/entwurf1.jpg?v=1749474987468" alt="Entwurf 3" />
+        <img src="https://cdn.glitch.global/3d242914-de51-45a7-a32b-6aed16315438/entwurf4.jpeg?v=1749801746238" alt="Entwurf 4" />
+        <img src="https://cdn.glitch.global/3d242914-de51-45a7-a32b-6aed16315438/entwurf5.jpeg?v=1750233504281" alt="Entwurf 4" />
+        <img src="https://cdn.glitch.global/3d242914-de51-45a7-a32b-6aed16315438/entwurf6.jpeg?v=1750233634013" alt="Entwurf 4" />
+
+      </div>
+    </section>
+
+    <section class="journal-section", id="journal">
+      <h2>📖 Digitale Ausgabe: Heft Nr. 1</h2>
+      <div class="digital-journal">
+        <img src="https://cdn.glitch.global/3d242914-de51-45a7-a32b-6aed16315438/page1.jpg?v=1749389129693" alt="Seite 1" />
+        <img src="https://cdn.glitch.global/3d242914-de51-45a7-a32b-6aed16315438/page2.jpg?v=1749389142029" alt="Seite 2" />
+        <img src="https://cdn.glitch.global/3d242914-de51-45a7-a32b-6aed16315438/page3.jpg?v=1749389156182" alt="Seite 3" />
+        <img src="https://cdn.glitch.global/3d242914-de51-45a7-a32b-6aed16315438/page4.jpg?v=1749389164509" alt="Seite 4" />
+      </div>
+    </section>
+<section class="journal-section">
+  <h2>📖 Digitale Ausgabe: Heft Nr. 5</h2>
+  <div class="digital-journal">
+    <img src="https://cdn.glitch.global/3d242914-de51-45a7-a32b-6aed16315438/coolchick5_1.jpeg?v=1749474540954" alt="Heft 3 - Seite 1" />
+    <img src="https://cdn.glitch.global/3d242914-de51-45a7-a32b-6aed16315438/coolchic5_2.jpeg?v=1749474548525" alt="Heft 3 - Seite 2" />
+  </div>
+</section>
+<section class="journal-section">
+  <h2>📖 Digitale Ausgabe: Heft Nr. 6</h2>
+  <div class="digital-journal">
+    <img src="https://cdn.glitch.global/3d242914-de51-45a7-a32b-6aed16315438/coolchic6_3.jpg?v=1749721280324" alt="Heft 3 - Seite 1" />
+    <img src="https://cdn.glitch.global/3d242914-de51-45a7-a32b-6aed16315438/coolchic6_1.jpg?v=1749721261061" alt="Heft 3 - Seite 2" />
+    <img src="https://cdn.glitch.global/3d242914-de51-45a7-a32b-6aed16315438/coolchic6_3.jpg?v=1749721280324" alt="Heft 3 - Seite 3" />
+  </div>
+</section>
+
+<section class="journal-section">
+  <h2>📖 Digitale Ausgabe: Heft Nr. 7</h2>
+  <div class="digital-journal">
+    <img src="https://cdn.glitch.global/3d242914-de51-45a7-a32b-6aed16315438/coolchic7_1.jpeg?v=1750233308050" alt="Heft 3 - Seite 1" />
+    <img src="https://cdn.glitch.global/3d242914-de51-45a7-a32b-6aed16315438/coolchic7_2.jpeg?v=1750233316891" alt="Heft 3 - Seite 2" />
+    <img src="https://cdn.glitch.global/3d242914-de51-45a7-a32b-6aed16315438/coolchic7_3.jpeg?v=1750233321393" alt="Heft 3 - Seite 3" />
+  </div>
+</section>
+    <section class="journal-section", id="math">>
+      <h2>🧠 Mathe-Spiel</h2>
+      <button onclick="toggleMathGame()">Mathe-Spiel starten</button>
+      <div id="math-game">
+        <h3>Aufgabe: <span id="question"></span></h3>
+        <p>Klicke, um <strong>rote</strong> und <strong>blaue</strong> Kugeln zu platzieren</p>
+        <div id="grid-container">
+          <div id="grid"></div>
+        </div>
+        <p>Antwort: <input id="answer" type="number" /> <button onclick="checkAnswer()">Prüfen</button></p>
+      </div>
+    </section>
+
+    <section class="journal-section symmetry-container", id="symmetry">
+      <h2>🎀 Symmetriespaß!</h2>
+
+      <h3>🪞 Spiegelsymmetrie</h3>
+      <label for="colorPickerMirror">Farbe:</label>
+      <select id="colorPickerMirror">
+        <option value="#e91e63">Pink</option>
+        <option value="black">Schwarz</option>
+        <option value="red">Rot</option>
+        <option value="blue">Blau</option>
+        <option value="green">Grün</option>
+        <option value="gold">Gold</option>
+      </select>
+      <canvas id="symmetryCanvas" width="800" height="500"></canvas>
+      <button onclick="clearCanvas('symmetryCanvas')">Alles löschen</button>
+
+      <h3>🌸 Radialsymmetrie (6-fach)</h3>
+      <label for="colorPickerRadial">Farbe:</label>
+      <select id="colorPickerRadial">
+        <option value="#e91e63">Pink</option>
+        <option value="black">Schwarz</option>
+        <option value="red">Rot</option>
+        <option value="blue">Blau</option>
+        <option value="green">Grün</option>
+        <option value="gold">Gold</option>
+      </select>
+      <canvas id="radialCanvas" width="800" height="500"></canvas>
+      <button onclick="clearCanvas('radialCanvas')">Alles löschen</button>
+
+      <h3>🔄 Rotationssymmetrie</h3>
+      <label for="rotationDegree">Drehgrad:</label>
+      <select id="rotationDegree">
+        <option value="3">3-fach</option>
+        <option value="4">4-fach</option>
+        <option value="6" selected>6-fach</option>
+        <option value="8">8-fach</option>
+        <option value="12">12-fach</option>
+      </select>
+      <label for="colorPickerRot">Farbe:</label>
+      <select id="colorPickerRot">
+        <option value="#e91e63">Pink</option>
+        <option value="black">Schwarz</option>
+        <option value="red">Rot</option>
+        <option value="blue">Blau</option>
+        <option value="green">Grün</option>
+        <option value="gold">Gold</option>
+      </select>
+      <canvas id="rotCanvas" width="800" height="500"></canvas>
+      <button onclick="clearCanvas('rotCanvas')">Alles löschen</button>
+    </section>
+
+<section class="journal-section", id = "pong">
+  <h2>🎯 Pong Hau K’i</h2>
+  <p>Zwei-Spieler-Spiel: Du bist <strong style="color:red;">Rot</strong>, dein Gegner ist <strong style="color:blue;">Blau</strong>.</p>
+  <canvas id="pongCanvas" width="300" height="300" style="border: 2px solid #e91e63; background: #fff;"></canvas>
+  <p id="pongStatus" style="margin-top: 10px; font-weight: bold;"></p>
+</section>
+
+
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <script>
+    let a, b, total, operation;
+
+    function toggleMathGame() {
+      const game = document.getElementById("math-game");
+      game.style.display = game.style.display === "none" ? "block" : "none";
+      if (game.style.display === "block") newProblem();
+    }
+
+    function newProblem() {
+      const grid = document.getElementById("grid");
+      grid.innerHTML = "";
+      document.getElementById("answer").value = "";
+
+      operation = Math.random() < 0.5 ? '+' : '-';
+      if (operation === '+') {
+        a = Math.floor(Math.random() * 11);
+        b = Math.floor(Math.random() * (21 - a));
+        total = a + b;
+      } else {
+        a = Math.floor(Math.random() * 21);
+        b = Math.floor(Math.random() * (a + 1));
+        total = a - b;
+      }
+
+      document.getElementById("question").textContent = `${a} ${operation} ${b}`;
+
+      for (let i = 0; i < 20; i++) {
+        const cell = document.createElement("div");
+        cell.className = "cell";
+        if (operation === '-' && i < a) cell.classList.add("red");
+        cell.onclick = () => {
+          if (operation === '+') {
+            const redCount = document.querySelectorAll(".cell.red").length;
+            const blueCount = document.querySelectorAll(".cell.blue").length;
+            if (cell.classList.contains("red")) {
+              cell.classList.remove("red");
+            } else if (cell.classList.contains("blue")) {
+              cell.classList.remove("blue");
+            } else {
+              if (redCount < a) cell.classList.add("red");
+              else if (blueCount < b) cell.classList.add("blue");
+            }
+          } else {
+            if (cell.classList.contains("red") && !cell.classList.contains("blue")) {
+              if (document.querySelectorAll(".cell.blue").length < b) cell.classList.add("blue");
+            } else if (cell.classList.contains("blue")) {
+              cell.classList.remove("blue");
+            }
+          }
+        };
+        grid.appendChild(cell);
+      }
+    }
+
+    function checkAnswer() {
+      const val = parseInt(document.getElementById("answer").value);
+      const redCount = document.querySelectorAll(".cell.red").length;
+      const blueCount = document.querySelectorAll(".cell.blue").length;
+      const correct = redCount === a && blueCount === b && val === total;
+      if (correct) {
+        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+        setTimeout(() => { confetti.reset(); newProblem(); }, 3000);
+      } else {
+        alert("Ups! Versuch es nochmal.");
+      }
+    }
+
+    function clearCanvas(id) {
+      const canvas = document.getElementById(id);
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function setupSymmetryCanvas(canvasId, type, getOptions = () => ({})) {
+      const canvas = document.getElementById(canvasId);
+      const ctx = canvas.getContext("2d");
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      let drawing = false;
+
+      function getXY(e) {
+        const rect = canvas.getBoundingClientRect();
+        return {
+          x: (e.clientX || e.touches[0].clientX) - rect.left,
+          y: (e.clientY || e.touches[0].clientY) - rect.top,
+        };
+      }
+
+      function draw(e) {
+        if (!drawing) return;
+        const { x, y } = getXY(e);
+        const { color = "#000", sectors = 6 } = getOptions();
+        ctx.fillStyle = color;
+
+        if (type === "mirror") {
+          ctx.beginPath();
+          ctx.arc(x, y, 2.5, 0, 2 * Math.PI);
+          ctx.fill();
+          const mirrorX = centerX - (x - centerX);
+          ctx.beginPath();
+          ctx.arc(mirrorX, y, 2.5, 0, 2 * Math.PI);
+          ctx.fill();
+        } else {
+          const dx = x - centerX;
+          const dy = y - centerY;
+          const r = Math.sqrt(dx * dx + dy * dy);
+          const angle = Math.atan2(dy, dx);
+          for (let i = 0; i < sectors; i++) {
+            const theta = angle + (i * 2 * Math.PI / sectors);
+            const sx = centerX + r * Math.cos(theta);
+            const sy = centerY + r * Math.sin(theta);
+            ctx.beginPath();
+            ctx.arc(sx, sy, 2.5, 0, 2 * Math.PI);
+            ctx.fill();
+          }
+        }
+      }
+
+      canvas.addEventListener("mousedown", () => drawing = true);
+      canvas.addEventListener("mouseup", () => drawing = false);
+      canvas.addEventListener("mouseout", () => drawing = false);
+      canvas.addEventListener("mousemove", draw);
+      canvas.addEventListener("touchstart", () => drawing = true);
+      canvas.addEventListener("touchend", () => drawing = false);
+      canvas.addEventListener("touchcancel", () => drawing = false);
+      canvas.addEventListener("touchmove", e => {
+        e.preventDefault(); draw(e);
+      }, { passive: false });
+    }
+
+    setupSymmetryCanvas("symmetryCanvas", "mirror", () => ({
+      color: document.getElementById("colorPickerMirror").value
+    }));
+
+    setupSymmetryCanvas("radialCanvas", "radial", () => ({
+      color: document.getElementById("colorPickerRadial").value,
+      sectors: 6
+    }));
+
+    setupSymmetryCanvas("rotCanvas", "radial", () => ({
+      color: document.getElementById("colorPickerRot").value,
+      sectors: parseInt(document.getElementById("rotationDegree").value)
+    }));
+  </script>
+<script>
+  // --- PONG HAU KI GAME ---
+  const pongCanvas = document.getElementById("pongCanvas");
+  const pongCtx = pongCanvas.getContext("2d");
+
+  const pongPositions = [
+    [150, 30],   // 0
+    [30, 150],   // 1
+    [270, 150],  // 2
+    [90, 270],   // 3
+    [210, 270],  // 4
+  ];
+
+  const pongEdges = new Set([
+    "0-1", "0-2", "1-3", "2-4", "3-4", "1-4", "2-3"
+  ]);
+
+  let pongPieces = {
+    red: [1, 3],
+    blue: [0, 2]
+  };
+
+  let pongSelected = null;
+  let pongCurrent = "red";
+
+  function drawPongBoard() {
+    pongCtx.clearRect(0, 0, pongCanvas.width, pongCanvas.height);
+
+    // Edges
+    pongEdges.forEach(e => {
+      const [a, b] = e.split("-").map(Number);
+      const [x1, y1] = pongPositions[a];
+      const [x2, y2] = pongPositions[b];
+      pongCtx.strokeStyle = "#888";
+      pongCtx.lineWidth = 2;
+      pongCtx.beginPath();
+      pongCtx.moveTo(x1, y1);
+      pongCtx.lineTo(x2, y2);
+      pongCtx.stroke();
+    });
+
+    // Nodes
+    pongPositions.forEach(([x, y], i) => {
+      pongCtx.fillStyle = "#fff";
+      pongCtx.beginPath();
+      pongCtx.arc(x, y, 20, 0, 2 * Math.PI);
+      pongCtx.fill();
+      pongCtx.strokeStyle = "#bbb";
+      pongCtx.stroke();
+    });
+
+    // Pieces
+    for (const [player, posArray] of Object.entries(pongPieces)) {
+      pongCtx.fillStyle = player;
+      posArray.forEach(p => {
+        const [x, y] = pongPositions[p];
+        pongCtx.beginPath();
+        pongCtx.arc(x, y, 14, 0, 2 * Math.PI);
+        pongCtx.fill();
+
+        if (p === pongSelected) {
+          pongCtx.lineWidth = 3;
+          pongCtx.strokeStyle = "#000";
+          pongCtx.stroke();
+        }
+      });
+    }
+
+    document.getElementById("pongStatus").textContent =
+      `Am Zug: ${pongCurrent === "red" ? "🔴 Rot" : "🔵 Blau"}`;
+  }
+
+  function isPongOccupied(pos) {
+    return Object.values(pongPieces).flat().includes(pos);
+  }
+
+  function isPongMoveValid(from, to) {
+    const key = `${Math.min(from, to)}-${Math.max(from, to)}`;
+    return pongEdges.has(key) && !isPongOccupied(to);
+  }
+
+  pongCanvas.addEventListener("click", e => {
+    const rect = pongCanvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+const clicked = pongPositions.findIndex(([px, py]) => {
+  const distance = Math.sqrt((px - x) ** 2 + (py - y) ** 2);
+  return distance < 30; // increase from 20 to 30 pixels
+});
+
+
+    if (clicked === -1) return;
+
+    const playerPieces = pongPieces[pongCurrent];
+
+    if (playerPieces.includes(clicked)) {
+      pongSelected = pongSelected === clicked ? null : clicked;
+    } else if (pongSelected !== null && isPongMoveValid(pongSelected, clicked)) {
+      const idx = playerPieces.indexOf(pongSelected);
+      playerPieces[idx] = clicked;
+      pongSelected = null;
+      pongCurrent = pongCurrent === "red" ? "blue" : "red";
+    }
+
+    drawPongBoard();
+  });
+
+  drawPongBoard();
+</script>
+<div id="zoomModal" onclick="closeZoom()">
+  <img id="zoomedImage" src="" alt="Zoomed View">
+</div>
+<script>
+  // Zoom image when clicked
+  document.querySelectorAll(".digital-journal img").forEach(img => {
+    img.addEventListener("click", () => {
+      document.getElementById("zoomedImage").src = img.src;
+      document.getElementById("zoomModal").style.display = "flex";
+    });
+  });
+
+  function closeZoom() {
+    document.getElementById("zoomModal").style.display = "none";
+  }
+</script>
+
+  
+</body>
+</html>
+
