@@ -1,0 +1,1257 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="site.css" />
+  <title>Spiele | Junos Cool&amp;Chic</title>
+  <style>
+    button {
+      border: 2px solid #d81b60;
+      border-radius: 10px;
+      background: #fff;
+      color: #b01256;
+      font-weight: bold;
+      font-family: inherit;
+      padding: 6px 12px;
+      cursor: pointer;
+      line-height: 1.2;
+    }
+
+    .games-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 0 0 20px;
+    }
+
+    .games-links a {
+      text-decoration: none;
+      color: #b01256;
+      font-weight: 800;
+      background: #fff;
+      padding: 8px 14px;
+      border-radius: 999px;
+      box-shadow: inset 0 0 0 2px rgba(216, 27, 96, 0.15);
+    }
+
+    canvas {
+      display: block;
+      margin: 10px auto;
+      border: 2px solid #e91e63;
+      background: #fff;
+      max-width: 100%;
+      height: auto;
+    }
+
+    .symmetry-container {
+      text-align: center;
+    }
+
+    .symmetry-actions {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+
+    .pong-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      align-items: center;
+      margin: 10px 0;
+    }
+
+    #math-game {
+      background: #f8bbd0;
+      padding: 20px;
+      border-radius: 20px;
+      max-width: 900px;
+      margin: 20px auto;
+      display: none;
+    }
+
+    .math-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+
+    .math-toolbar button {
+      color: #d81b60;
+      border-radius: 999px;
+      padding: 8px 14px;
+    }
+
+    .math-toolbar button.active {
+      background: #d81b60;
+      color: #fff;
+    }
+
+    .math-panel {
+      display: none;
+      background: rgba(255, 255, 255, 0.45);
+      border: 2px dashed #e91e63;
+      border-radius: 16px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .math-panel.active {
+      display: block;
+    }
+
+    #grid-container {
+      display: flex;
+      justify-content: center;
+      margin: 16px 0;
+    }
+
+    #grid {
+      display: grid;
+      grid-template-columns: repeat(10, 24px);
+      grid-template-rows: repeat(2, 24px);
+      gap: 6px;
+    }
+
+    .cell {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #eee;
+      border: none;
+      cursor: pointer;
+      box-sizing: border-box;
+    }
+
+    #grid > * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    .red { background: crimson !important; }
+    .blue { background: royalblue !important; }
+
+    .math-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      align-items: center;
+      margin-top: 8px;
+    }
+
+    .math-input {
+      width: 110px;
+      padding: 6px 8px;
+      border: 1px solid #d81b60;
+      border-radius: 8px;
+      font-size: 1rem;
+      text-align: center;
+    }
+
+    .math-status {
+      min-height: 24px;
+      font-weight: bold;
+      color: #7a1240;
+      margin-top: 12px;
+      text-align: center;
+    }
+
+    .multiply-rows {
+      margin: 14px auto;
+      max-width: 520px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: flex-start;
+    }
+
+    .multiply-row {
+      background: #fff;
+      border-radius: 10px;
+      border: 1px solid #f48fb1;
+      padding: 6px 10px;
+      letter-spacing: 1px;
+    }
+
+    .multiply-helper {
+      color: #6a1b45;
+      font-size: 0.95rem;
+      margin-top: 10px;
+    }
+
+    .divide-board {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 10px;
+      margin: 16px 0;
+      text-align: left;
+    }
+
+    .divide-plate {
+      background: #fff;
+      border: 2px solid #f06292;
+      border-radius: 12px;
+      padding: 10px;
+    }
+
+    .divide-plate button {
+      margin-top: 8px;
+      width: 100%;
+      border-width: 1px;
+      border-radius: 8px;
+      background: #fff7fb;
+      color: #b01256;
+    }
+
+    .divide-candies {
+      min-height: 24px;
+      word-break: break-word;
+    }
+
+    .subdivide-story {
+      margin-bottom: 10px;
+    }
+
+    .subdivide-board {
+      position: relative;
+      width: min(100%, 680px);
+      min-height: 300px;
+      margin: 18px auto 14px;
+      border: 2px dashed #e91e63;
+      border-radius: 20px;
+      background: linear-gradient(180deg, #fffdfd 0%, #fff4f8 100%);
+      overflow: hidden;
+      touch-action: none;
+    }
+
+    .subdivide-balls {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .subdivide-ball {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      background: radial-gradient(circle at 30% 30%, #fff7fb 0%, #ff8cb8 45%, #d81b60 100%);
+      box-shadow: 0 4px 10px rgba(216, 27, 96, 0.22);
+      pointer-events: auto;
+      cursor: pointer;
+      transition: opacity 120ms ease, transform 120ms ease, filter 120ms ease;
+    }
+
+    .subdivide-ball.removed {
+      opacity: 0.16;
+      transform: translate(-50%, -50%) scale(0.82);
+      filter: grayscale(0.3);
+    }
+
+    .subdivide-ball.selected {
+      transform: translate(-50%, -50%) scale(1.14);
+      box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.9), 0 0 0 8px rgba(216, 27, 96, 0.24);
+      filter: saturate(1.15);
+    }
+
+    .subdivide-summary {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 18px;
+      justify-content: center;
+      align-items: center;
+      margin: 0 0 10px;
+      color: #7a1240;
+      font-weight: 700;
+    }
+
+    @media (max-width: 640px) {
+      #grid {
+        grid-template-columns: repeat(10, 20px);
+        grid-template-rows: repeat(2, 20px);
+        gap: 5px;
+      }
+
+      .cell {
+        width: 20px;
+        height: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <h1>Spiele</h1>
+  </header>
+
+  <nav class="site-nav">
+    <ul>
+      <li><a href="index.html">Start</a></li>
+      <li><a href="hefte.html">Hefte &amp; Entwuerfe</a></li>
+      <li><a href="adventskalender.html">Adventskalender</a></li>
+      <li><a href="spiele.html" aria-current="page">Spiele</a></li>
+    </ul>
+  </nav>
+
+  <main>
+    <div class="games-links">
+      <a href="#math">Mathe-Spiel</a>
+      <a href="#symmetry">Symmetrie</a>
+      <a href="#pong">Pong Hau K’i</a>
+    </div>
+
+    <section class="journal-section" id="math">
+      <h2>Mathe-Spiel</h2>
+      <button onclick="toggleMathGame()">Mathe-Spiel starten</button>
+      <div id="math-game">
+        <div class="math-toolbar">
+          <button id="tab-plusminus" class="active" onclick="setMathMode('plusminus')">Kugel-Rechnen</button>
+          <button id="tab-multiply" onclick="setMathMode('multiply')">Reihen-Rakete</button>
+          <button id="tab-divide" onclick="setMathMode('divide')">Suessigkeiten-Teiler</button>
+          <button id="tab-subdivide" onclick="setMathMode('subdivide')">Division durch Subtraktion</button>
+        </div>
+
+        <div id="math-plusminus-panel" class="math-panel active">
+          <h3>Aufgabe: <span id="question"></span></h3>
+          <p>Klicke, um <strong>rote</strong> und <strong>blaue</strong> Kugeln zu platzieren.</p>
+          <div id="grid-container">
+            <div id="grid"></div>
+          </div>
+          <div class="math-controls">
+            <label for="answer">Antwort:</label>
+            <input id="answer" class="math-input" type="number" />
+            <button onclick="checkAnswer()">Pruefen</button>
+            <button onclick="newProblem()">Neue Aufgabe</button>
+          </div>
+          <p class="math-status" id="plusminus-status"></p>
+        </div>
+
+        <div id="math-multiply-panel" class="math-panel">
+          <h3>Reihen-Rakete</h3>
+          <p id="multiply-story"></p>
+          <div id="multiply-array" class="multiply-rows"></div>
+          <div class="math-controls">
+            <label for="multiply-answer">Antwort:</label>
+            <input id="multiply-answer" class="math-input" type="number" />
+            <button onclick="checkMultiplyAnswer()">Pruefen</button>
+            <button onclick="newMultiplyProblem()">Neue Aufgabe</button>
+          </div>
+          <p class="multiply-helper" id="multiply-fact"></p>
+          <p class="math-status" id="multiply-status"></p>
+        </div>
+
+        <div id="math-divide-panel" class="math-panel">
+          <h3>Suessigkeiten-Teiler</h3>
+          <p id="divide-story"></p>
+          <div id="divide-board" class="divide-board"></div>
+          <p>Noch uebrig: <strong id="divide-left">0</strong> 🍬</p>
+          <div class="math-controls">
+            <button onclick="dropCandy()">Eine Suessigkeit verteilen</button>
+            <button onclick="resetDivisionDistribution()">Neu verteilen</button>
+          </div>
+          <div class="math-controls">
+            <label for="divide-answer">Wieviel bekommt jedes Kind?</label>
+            <input id="divide-answer" class="math-input" type="number" />
+            <button onclick="checkDivideAnswer()">Pruefen</button>
+            <button onclick="newDivisionProblem()">Neue Aufgabe</button>
+          </div>
+          <p class="math-status" id="divide-status"></p>
+        </div>
+
+        <div id="math-subdivide-panel" class="math-panel">
+          <h3>Division durch Subtraktion</h3>
+          <p id="subdivide-story" class="subdivide-story"></p>
+          <div class="subdivide-summary">
+            <span>Ergebnis: <strong id="subdivide-quotient">0</strong></span>
+            <span>Noch uebrig: <strong id="subdivide-left">0</strong></span>
+            <span>Gruppengroesse: <strong id="subdivide-group-size">0</strong></span>
+            <span>Ausgewaehlt: <strong id="subdivide-selected">0</strong></span>
+          </div>
+          <div id="subdivide-board" class="subdivide-board">
+            <div id="subdivide-balls" class="subdivide-balls"></div>
+          </div>
+          <p>Klicke genau eine Gruppe an und ziehe sie dann ab.</p>
+          <div class="math-controls">
+            <button id="subdivide-remove" onclick="removeSubdivideGroup()" disabled>Gruppe abziehen</button>
+            <button id="subdivide-clear" onclick="clearSubdivideSelection()" disabled>Auswahl loeschen</button>
+            <label for="subdivide-remainder">Rest:</label>
+            <input id="subdivide-remainder" class="math-input" type="number" readonly />
+            <button id="subdivide-remainder-button" onclick="copySubdivideRemainder()" disabled>Rest uebernehmen</button>
+            <button onclick="checkSubdivideAnswer()">Pruefen</button>
+            <button onclick="newSubdivideProblem()">Neue Aufgabe</button>
+          </div>
+          <p class="math-status" id="subdivide-status"></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="journal-section symmetry-container" id="symmetry">
+      <h2>Symmetrie</h2>
+
+      <h3>Spiegelsymmetrie</h3>
+      <label for="colorPickerMirror">Farbe:</label>
+      <select id="colorPickerMirror">
+        <option value="#e91e63">Pink</option>
+        <option value="black">Schwarz</option>
+        <option value="red">Rot</option>
+        <option value="blue">Blau</option>
+        <option value="green">Gruen</option>
+        <option value="gold">Gold</option>
+      </select>
+      <canvas id="symmetryCanvas" width="800" height="500"></canvas>
+      <div class="symmetry-actions">
+        <button onclick="clearCanvas('symmetryCanvas')">Alles loeschen</button>
+        <button onclick="downloadCanvas('symmetryCanvas', 'spiegel')">Bild speichern</button>
+      </div>
+
+      <h3>Radialsymmetrie</h3>
+      <label for="colorPickerRadial">Farbe:</label>
+      <select id="colorPickerRadial">
+        <option value="#e91e63">Pink</option>
+        <option value="black">Schwarz</option>
+        <option value="red">Rot</option>
+        <option value="blue">Blau</option>
+        <option value="green">Gruen</option>
+        <option value="gold">Gold</option>
+      </select>
+      <canvas id="radialCanvas" width="800" height="500"></canvas>
+      <div class="symmetry-actions">
+        <button onclick="clearCanvas('radialCanvas')">Alles loeschen</button>
+        <button onclick="downloadCanvas('radialCanvas', 'radial')">Bild speichern</button>
+      </div>
+
+      <h3>Rotationssymmetrie</h3>
+      <label for="rotationDegree">Drehgrad:</label>
+      <select id="rotationDegree">
+        <option value="3">3-fach</option>
+        <option value="4">4-fach</option>
+        <option value="6" selected>6-fach</option>
+        <option value="8">8-fach</option>
+        <option value="12">12-fach</option>
+      </select>
+      <label for="colorPickerRot">Farbe:</label>
+      <select id="colorPickerRot">
+        <option value="#e91e63">Pink</option>
+        <option value="black">Schwarz</option>
+        <option value="red">Rot</option>
+        <option value="blue">Blau</option>
+        <option value="green">Gruen</option>
+        <option value="gold">Gold</option>
+      </select>
+      <canvas id="rotCanvas" width="800" height="500"></canvas>
+      <div class="symmetry-actions">
+        <button onclick="clearCanvas('rotCanvas')">Alles loeschen</button>
+        <button onclick="downloadCanvas('rotCanvas', 'rotation')">Bild speichern</button>
+      </div>
+    </section>
+
+    <section class="journal-section" id="pong">
+      <h2>Pong Hau K’i</h2>
+      <p>Du spielst als <strong style="color:red;">Rot</strong>.</p>
+      <div class="pong-controls">
+        <label for="pongMode">Modus:</label>
+        <select id="pongMode">
+          <option value="computer" selected>Gegen Computer</option>
+          <option value="human">2 Spieler</option>
+        </select>
+        <button type="button" id="pongReset">Neu starten</button>
+      </div>
+      <canvas id="pongCanvas" width="300" height="300" style="border: 2px solid #e91e63; background: #fff;"></canvas>
+      <p id="pongStatus" style="margin-top: 10px; font-weight: bold;"></p>
+    </section>
+  </main>
+
+  <footer>
+    <p class="privacy-note">Junos Cool&amp;Chic</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <script>
+    let a, b, total, operation;
+    let mathMode = "plusminus";
+    let multiplyA = 0;
+    let multiplyB = 0;
+    let multiplyProduct = 0;
+    let multiplyStreak = 0;
+    let multiplyTheme = { emoji: "⭐", item: "Sterne" };
+
+    let divideGroups = 0;
+    let dividePerGroup = 0;
+    let divideTotal = 0;
+    let dividePlaced = [];
+    let divideNextPlate = 0;
+    let divideStreak = 0;
+    let subdivideDividend = 0;
+    let subdivideDivisor = 0;
+    let subdivideQuotient = 0;
+    let subdivideExpectedQuotient = 0;
+    let subdivideExpectedRemainder = 0;
+    let subdivideBalls = [];
+    let subdivideSelected = new Set();
+
+    const multiplyThemes = [
+      { emoji: "⭐", item: "Sterne" },
+      { emoji: "🧁", item: "Cupcakes" },
+      { emoji: "🌼", item: "Blumen" },
+      { emoji: "🦄", item: "Einhoerner" },
+      { emoji: "🎈", item: "Ballons" }
+    ];
+
+    function celebrate() {
+      if (typeof confetti === "function") {
+        confetti({ particleCount: 120, spread: 75, origin: { y: 0.6 } });
+      }
+    }
+
+    function setStatus(id, message, color = "#7a1240") {
+      const el = document.getElementById(id);
+      el.textContent = message;
+      el.style.color = color;
+    }
+
+    function toggleMathGame() {
+      const game = document.getElementById("math-game");
+      const isVisible = game.style.display === "block";
+      game.style.display = isVisible ? "none" : "block";
+      if (!isVisible) setMathMode(mathMode);
+    }
+
+    function setMathMode(mode) {
+      mathMode = mode;
+      const modes = ["plusminus", "multiply", "divide", "subdivide"];
+      modes.forEach((name) => {
+        document.getElementById(`tab-${name}`).classList.toggle("active", name === mode);
+        document.getElementById(`math-${name}-panel`).classList.toggle("active", name === mode);
+      });
+
+      if (mode === "plusminus") newProblem();
+      if (mode === "multiply") newMultiplyProblem();
+      if (mode === "divide") newDivisionProblem();
+      if (mode === "subdivide") newSubdivideProblem();
+    }
+
+    function newProblem() {
+      const grid = document.getElementById("grid");
+      grid.innerHTML = "";
+      document.getElementById("answer").value = "";
+      setStatus("plusminus-status", "Baue die Kugeln passend zur Aufgabe.");
+
+      operation = Math.random() < 0.5 ? "+" : "-";
+      if (operation === "+") {
+        a = Math.floor(Math.random() * 11);
+        b = Math.floor(Math.random() * (21 - a));
+        total = a + b;
+      } else {
+        a = Math.floor(Math.random() * 21);
+        b = Math.floor(Math.random() * (a + 1));
+        total = a - b;
+      }
+
+      document.getElementById("question").textContent = `${a} ${operation} ${b}`;
+
+      for (let i = 0; i < 20; i++) {
+        const cell = document.createElement("div");
+        cell.className = "cell";
+        if (operation === "-" && i < a) cell.classList.add("red");
+        cell.onclick = () => {
+          if (operation === "+") {
+            const redCount = document.querySelectorAll(".cell.red").length;
+            const blueCount = document.querySelectorAll(".cell.blue").length;
+            if (cell.classList.contains("red")) {
+              cell.classList.remove("red");
+            } else if (cell.classList.contains("blue")) {
+              cell.classList.remove("blue");
+            } else if (redCount < a) {
+              cell.classList.add("red");
+            } else if (blueCount < b) {
+              cell.classList.add("blue");
+            }
+          } else if (cell.classList.contains("red") && !cell.classList.contains("blue")) {
+            if (document.querySelectorAll(".cell.blue").length < b) cell.classList.add("blue");
+          } else if (cell.classList.contains("blue")) {
+            cell.classList.remove("blue");
+          }
+        };
+        grid.appendChild(cell);
+      }
+    }
+
+    function checkAnswer() {
+      const val = parseInt(document.getElementById("answer").value, 10);
+      const redCount = document.querySelectorAll(".cell.red").length;
+      const blueCount = document.querySelectorAll(".cell.blue").length;
+      const correct = redCount === a && blueCount === b && val === total;
+      if (correct) {
+        celebrate();
+        setStatus("plusminus-status", "Richtig! Naechste Aufgabe kommt ...", "#1b5e20");
+        setTimeout(newProblem, 1200);
+      } else {
+        setStatus("plusminus-status", "Fast! Pruefe Kugeln und Zahl noch einmal.", "#ad1457");
+      }
+    }
+
+    function newMultiplyProblem() {
+      multiplyTheme = multiplyThemes[Math.floor(Math.random() * multiplyThemes.length)];
+      multiplyA = Math.floor(Math.random() * 5) + 2;
+      multiplyB = Math.floor(Math.random() * 8) + 2;
+      multiplyProduct = multiplyA * multiplyB;
+
+      document.getElementById("multiply-answer").value = "";
+      document.getElementById("multiply-story").textContent =
+        `Raketenauftrag: ${multiplyA} Reihen mit je ${multiplyB} ${multiplyTheme.item}.`;
+      document.getElementById("multiply-fact").textContent =
+        `Tipp: ${multiplyA} x ${multiplyB} bedeutet ${multiplyA} Gruppen mit je ${multiplyB}.`;
+
+      const array = document.getElementById("multiply-array");
+      array.innerHTML = "";
+      for (let row = 0; row < multiplyA; row++) {
+        const line = document.createElement("div");
+        line.className = "multiply-row";
+        line.textContent = `${multiplyTheme.emoji} `.repeat(multiplyB).trim();
+        array.appendChild(line);
+      }
+
+      setStatus("multiply-status", `Serie: ${multiplyStreak} richtig in Folge.`);
+    }
+
+    function checkMultiplyAnswer() {
+      const val = parseInt(document.getElementById("multiply-answer").value, 10);
+      if (Number.isNaN(val)) {
+        setStatus("multiply-status", "Trag zuerst eine Zahl ein.", "#ad1457");
+        return;
+      }
+
+      if (val === multiplyProduct) {
+        multiplyStreak += 1;
+        celebrate();
+        setStatus("multiply-status", `Perfekt! Serie: ${multiplyStreak}`, "#1b5e20");
+        setTimeout(newMultiplyProblem, 1200);
+      } else {
+        multiplyStreak = 0;
+        setStatus("multiply-status", `Noch nicht. Denk an ${multiplyA} Reihen mit ${multiplyB}.`, "#ad1457");
+      }
+    }
+
+    function candiesLeft() {
+      return divideTotal - dividePlaced.reduce((sum, count) => sum + count, 0);
+    }
+
+    function renderDivisionBoard() {
+      const board = document.getElementById("divide-board");
+      board.innerHTML = "";
+
+      dividePlaced.forEach((count, index) => {
+        const plate = document.createElement("div");
+        plate.className = "divide-plate";
+        plate.innerHTML = `
+          <strong>Kind ${index + 1}</strong>
+          <div class="divide-candies">${count > 0 ? "🍬".repeat(count) : "Noch leer"}</div>
+        `;
+
+        const placeButton = document.createElement("button");
+        placeButton.type = "button";
+        placeButton.textContent = "Hier ablegen";
+        placeButton.onclick = () => placeCandy(index);
+        plate.appendChild(placeButton);
+        board.appendChild(plate);
+      });
+
+      document.getElementById("divide-left").textContent = String(candiesLeft());
+    }
+
+    function placeCandy(index) {
+      if (candiesLeft() === 0) return false;
+      dividePlaced[index] += 1;
+      renderDivisionBoard();
+      return true;
+    }
+
+    function dropCandy() {
+      if (divideGroups === 0) return;
+      if (placeCandy(divideNextPlate)) {
+        divideNextPlate = (divideNextPlate + 1) % divideGroups;
+      }
+    }
+
+    function resetDivisionDistribution() {
+      dividePlaced = Array(divideGroups).fill(0);
+      divideNextPlate = 0;
+      renderDivisionBoard();
+      setStatus("divide-status", "Verteile gerecht und gib dann das Ergebnis ein.");
+    }
+
+    function newDivisionProblem() {
+      divideGroups = Math.floor(Math.random() * 4) + 2;
+      dividePerGroup = Math.floor(Math.random() * 7) + 2;
+      divideTotal = divideGroups * dividePerGroup;
+
+      document.getElementById("divide-story").textContent =
+        `Heute teilen ${divideGroups} Kinder zusammen ${divideTotal} Suessigkeiten.`;
+      document.getElementById("divide-answer").value = "";
+
+      resetDivisionDistribution();
+    }
+
+    function checkDivideAnswer() {
+      const val = parseInt(document.getElementById("divide-answer").value, 10);
+      if (Number.isNaN(val)) {
+        setStatus("divide-status", "Trag zuerst eine Zahl ein.", "#ad1457");
+        return;
+      }
+
+      const fairDistributed = dividePlaced.every((count) => count === dividePerGroup);
+      const correct = val === dividePerGroup && fairDistributed && candiesLeft() === 0;
+
+      if (correct) {
+        divideStreak += 1;
+        celebrate();
+        setStatus("divide-status", `Super geteilt! Serie: ${divideStreak}`, "#1b5e20");
+        setTimeout(newDivisionProblem, 1200);
+      } else if (candiesLeft() > 0) {
+        divideStreak = 0;
+        setStatus("divide-status", "Verteile erst alle Suessigkeiten.", "#ad1457");
+      } else if (!fairDistributed) {
+        divideStreak = 0;
+        setStatus("divide-status", "Noch nicht ganz fair verteilt. Vergleiche die Teller.", "#ad1457");
+      } else {
+        divideStreak = 0;
+        setStatus("divide-status", "Fast! Pruefe die Division nochmal.", "#ad1457");
+      }
+    }
+
+    function subdivideRemaining() {
+      return subdivideBalls.filter((ball) => !ball.removed).length;
+    }
+
+    function updateSubdivideSummary() {
+      document.getElementById("subdivide-quotient").textContent = String(subdivideQuotient);
+      document.getElementById("subdivide-left").textContent = String(subdivideRemaining());
+      document.getElementById("subdivide-group-size").textContent = String(subdivideDivisor);
+      document.getElementById("subdivide-selected").textContent = String(subdivideSelected.size);
+    }
+
+    function updateSubdivideControls() {
+      const selectedCount = subdivideSelected.size;
+      const remaining = subdivideRemaining();
+      document.getElementById("subdivide-remove").disabled = selectedCount !== subdivideDivisor;
+      document.getElementById("subdivide-clear").disabled = selectedCount === 0;
+      document.getElementById("subdivide-remainder-button").disabled =
+        selectedCount > 0 || remaining >= subdivideDivisor;
+    }
+
+    function renderSubdivideBoard() {
+      const board = document.getElementById("subdivide-board");
+      const ballsLayer = document.getElementById("subdivide-balls");
+      if (!board || !ballsLayer) return;
+
+      const width = Math.max(board.clientWidth, 320);
+      const columns = Math.min(6, Math.max(4, Math.ceil(Math.sqrt(subdivideDividend))));
+      const rows = Math.ceil(subdivideDividend / columns);
+      const height = Math.max(300, rows * 62 + 54);
+      board.style.height = `${height}px`;
+
+      ballsLayer.innerHTML = "";
+      const stepX = width / (columns + 1);
+      const stepY = height / (rows + 1);
+
+      subdivideBalls.forEach((ball, index) => {
+        const column = index % columns;
+        const row = Math.floor(index / columns);
+        const jitterX = ((index % 3) - 1) * 4;
+        const jitterY = ((index % 4) - 1.5) * 3;
+        ball.x = stepX * (column + 1) + jitterX;
+        ball.y = stepY * (row + 1) + jitterY;
+
+        const ballEl = document.createElement("div");
+        const selectedClass = subdivideSelected.has(index) ? " selected" : "";
+        ballEl.className = `subdivide-ball${ball.removed ? " removed" : ""}${selectedClass}`;
+        ballEl.style.left = `${ball.x}px`;
+        ballEl.style.top = `${ball.y}px`;
+        ballEl.dataset.index = String(index);
+        ballEl.setAttribute("role", "button");
+        ballEl.setAttribute("tabindex", ball.removed ? "-1" : "0");
+        ballEl.setAttribute("aria-label", `Kugel ${index + 1}`);
+        if (!ball.removed) {
+          ballEl.addEventListener("click", () => toggleSubdivideBall(index));
+          ballEl.addEventListener("keydown", (event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              toggleSubdivideBall(index);
+            }
+          });
+        }
+        ballsLayer.appendChild(ballEl);
+      });
+
+      updateSubdivideSummary();
+      updateSubdivideControls();
+    }
+
+    function toggleSubdivideBall(index) {
+      const ball = subdivideBalls[index];
+      if (!ball || ball.removed) return;
+
+      if (subdivideSelected.has(index)) {
+        subdivideSelected.delete(index);
+        renderSubdivideBoard();
+        setStatus("subdivide-status", "Kugel aus der Gruppe entfernt.", "#7a1240");
+        return;
+      }
+
+      if (subdivideSelected.size >= subdivideDivisor) {
+        setStatus("subdivide-status", `Die Gruppe ist schon voll. Ziehe erst die ${subdivideDivisor} Kugeln ab.`, "#ad1457");
+        return;
+      }
+
+      subdivideSelected.add(index);
+      renderSubdivideBoard();
+      if (subdivideSelected.size === subdivideDivisor) {
+        setStatus("subdivide-status", "Gruppe komplett. Jetzt auf Gruppe abziehen klicken.", "#1b5e20");
+      } else {
+        setStatus(
+          "subdivide-status",
+          `Noch ${subdivideDivisor - subdivideSelected.size} Kugeln fuer diese Gruppe.`,
+          "#7a1240"
+        );
+      }
+    }
+
+    function clearSubdivideSelection() {
+      subdivideSelected.clear();
+      renderSubdivideBoard();
+      setStatus("subdivide-status", "Auswahl geloescht.", "#7a1240");
+    }
+
+    function removeSubdivideGroup() {
+      if (subdivideSelected.size !== subdivideDivisor) {
+        setStatus("subdivide-status", `Waehle genau ${subdivideDivisor} Kugeln aus.`, "#ad1457");
+        return;
+      }
+
+      subdivideSelected.forEach((index) => {
+        subdivideBalls[index].removed = true;
+      });
+      subdivideQuotient += 1;
+      subdivideSelected.clear();
+      document.getElementById("subdivide-remainder").value = "";
+      renderSubdivideBoard();
+
+      const left = subdivideRemaining();
+      if (left < subdivideDivisor) {
+        setStatus("subdivide-status", "Gut. Jetzt den Rest mit dem Button uebernehmen.", "#1b5e20");
+      } else {
+        setStatus("subdivide-status", "Gut. Stelle die naechste Gruppe zusammen.", "#1b5e20");
+      }
+    }
+
+    function newSubdivideProblem() {
+      subdivideDivisor = Math.floor(Math.random() * 4) + 2;
+      subdivideExpectedQuotient = Math.floor(Math.random() * 3) + 2;
+      subdivideExpectedRemainder = Math.floor(Math.random() * subdivideDivisor);
+      subdivideDividend = subdivideDivisor * subdivideExpectedQuotient + subdivideExpectedRemainder;
+      subdivideQuotient = 0;
+      subdivideSelected = new Set();
+      subdivideBalls = Array.from({ length: subdivideDividend }, () => ({
+        x: 0,
+        y: 0,
+        removed: false
+      }));
+
+      document.getElementById("subdivide-story").textContent =
+        `Rechne ${subdivideDividend} : ${subdivideDivisor}. Stelle immer Gruppen aus ${subdivideDivisor} Kugeln zusammen.`;
+      document.getElementById("subdivide-remainder").value = "";
+      updateSubdivideSummary();
+      updateSubdivideControls();
+      setStatus("subdivide-status", "Klicke die erste Gruppe an.", "#7a1240");
+      window.requestAnimationFrame(renderSubdivideBoard);
+    }
+
+    function copySubdivideRemainder() {
+      const remaining = subdivideRemaining();
+      if (subdivideSelected.size > 0) {
+        setStatus("subdivide-status", "Ziehe erst die ausgewaehlte Gruppe ab oder loesche sie.", "#ad1457");
+        return;
+      }
+      if (remaining >= subdivideDivisor) {
+        setStatus("subdivide-status", `Es passen noch Gruppen mit ${subdivideDivisor} Kugeln hinein.`, "#ad1457");
+        return;
+      }
+      document.getElementById("subdivide-remainder").value = String(remaining);
+      setStatus("subdivide-status", `Rest ${remaining} eingetragen. Jetzt pruefen.`, "#7a1240");
+    }
+
+    function checkSubdivideAnswer() {
+      const remaining = subdivideRemaining();
+      const remainderInput = document.getElementById("subdivide-remainder");
+      const remainderValue = parseInt(remainderInput.value, 10);
+
+      if (subdivideSelected.size > 0) {
+        setStatus("subdivide-status", "Die aktuelle Auswahl ist noch nicht abgezogen.", "#ad1457");
+        return;
+      }
+
+      if (remaining >= subdivideDivisor) {
+        setStatus("subdivide-status", `Du kannst noch eine Gruppe mit ${subdivideDivisor} Kugeln abziehen.`, "#ad1457");
+        return;
+      }
+
+      if (Number.isNaN(remainderValue)) {
+        setStatus("subdivide-status", "Trag den Rest mit dem Button ein.", "#ad1457");
+        return;
+      }
+
+      const correct =
+        subdivideQuotient === subdivideExpectedQuotient &&
+        remainderValue === subdivideExpectedRemainder &&
+        remaining === subdivideExpectedRemainder;
+
+      if (correct) {
+        celebrate();
+        setStatus(
+          "subdivide-status",
+          `Richtig! ${subdivideDividend} : ${subdivideDivisor} = ${subdivideQuotient} Rest ${remainderValue}.`,
+          "#1b5e20"
+        );
+        setTimeout(newSubdivideProblem, 1400);
+      } else {
+        setStatus("subdivide-status", "Pruefe Gruppen, Ergebnis und Rest noch einmal.", "#ad1457");
+      }
+    }
+
+    window.addEventListener("resize", () => {
+      if (mathMode === "subdivide" && subdivideBalls.length > 0) {
+        window.requestAnimationFrame(renderSubdivideBoard);
+      }
+    });
+
+    function clearCanvas(id) {
+      const canvas = document.getElementById(id);
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function downloadCanvas(id, label) {
+      const canvas = document.getElementById(id);
+      if (!canvas || !canvas.width || !canvas.height) return;
+
+      const exportCanvas = document.createElement("canvas");
+      exportCanvas.width = canvas.width;
+      exportCanvas.height = canvas.height;
+      const exportCtx = exportCanvas.getContext("2d");
+      exportCtx.fillStyle = "#ffffff";
+      exportCtx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
+      exportCtx.drawImage(canvas, 0, 0);
+
+      const link = document.createElement("a");
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+      link.href = exportCanvas.toDataURL("image/png");
+      link.download = `juno-symmetrie-${label}-${timestamp}.png`;
+      link.click();
+    }
+
+    function setupSymmetryCanvas(canvasId, type, getOptions = () => ({})) {
+      const canvas = document.getElementById(canvasId);
+      const ctx = canvas.getContext("2d");
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      let drawing = false;
+
+      function getXY(event) {
+        const rect = canvas.getBoundingClientRect();
+        return {
+          x: (event.clientX || event.touches[0].clientX) - rect.left,
+          y: (event.clientY || event.touches[0].clientY) - rect.top
+        };
+      }
+
+      function draw(event) {
+        if (!drawing) return;
+        const { x, y } = getXY(event);
+        const { color = "#000", sectors = 6 } = getOptions();
+        ctx.fillStyle = color;
+
+        if (type === "mirror") {
+          ctx.beginPath();
+          ctx.arc(x, y, 2.5, 0, 2 * Math.PI);
+          ctx.fill();
+          const mirrorX = centerX - (x - centerX);
+          ctx.beginPath();
+          ctx.arc(mirrorX, y, 2.5, 0, 2 * Math.PI);
+          ctx.fill();
+        } else {
+          const dx = x - centerX;
+          const dy = y - centerY;
+          const radius = Math.sqrt(dx * dx + dy * dy);
+          const angle = Math.atan2(dy, dx);
+          for (let i = 0; i < sectors; i++) {
+            const theta = angle + (i * 2 * Math.PI / sectors);
+            const sx = centerX + radius * Math.cos(theta);
+            const sy = centerY + radius * Math.sin(theta);
+            ctx.beginPath();
+            ctx.arc(sx, sy, 2.5, 0, 2 * Math.PI);
+            ctx.fill();
+          }
+        }
+      }
+
+      canvas.addEventListener("mousedown", () => { drawing = true; });
+      canvas.addEventListener("mouseup", () => { drawing = false; });
+      canvas.addEventListener("mouseout", () => { drawing = false; });
+      canvas.addEventListener("mousemove", draw);
+      canvas.addEventListener("touchstart", () => { drawing = true; });
+      canvas.addEventListener("touchend", () => { drawing = false; });
+      canvas.addEventListener("touchcancel", () => { drawing = false; });
+      canvas.addEventListener("touchmove", (event) => {
+        event.preventDefault();
+        draw(event);
+      }, { passive: false });
+    }
+
+    setupSymmetryCanvas("symmetryCanvas", "mirror", () => ({
+      color: document.getElementById("colorPickerMirror").value
+    }));
+
+    setupSymmetryCanvas("radialCanvas", "radial", () => ({
+      color: document.getElementById("colorPickerRadial").value,
+      sectors: 6
+    }));
+
+    setupSymmetryCanvas("rotCanvas", "radial", () => ({
+      color: document.getElementById("colorPickerRot").value,
+      sectors: parseInt(document.getElementById("rotationDegree").value, 10)
+    }));
+
+    const pongCanvas = document.getElementById("pongCanvas");
+    const pongCtx = pongCanvas.getContext("2d");
+
+    const pongPositions = [
+      [150, 30],
+      [30, 150],
+      [270, 150],
+      [90, 270],
+      [210, 270]
+    ];
+
+    const pongEdges = new Set([
+      "0-1", "0-2", "1-3", "2-4", "3-4", "1-4", "2-3"
+    ]);
+
+    function createInitialPongPieces() {
+      return {
+        red: [1, 3],
+        blue: [0, 2]
+      };
+    }
+
+    let pongPieces = createInitialPongPieces();
+    let pongSelected = null;
+    let pongCurrent = "red";
+    let pongMode = "computer";
+    let pongWinner = null;
+    let pongAiThinking = false;
+    let pongAiTimeoutId = null;
+
+    function getPongPlayerLabel(player) {
+      if (player === "red") return "Rot";
+      return pongMode === "computer" ? "Computer" : "Blau";
+    }
+
+    function isPongOccupiedInState(pos, state) {
+      return [...state.red, ...state.blue].includes(pos);
+    }
+
+    function isPongMoveValidInState(from, to, state) {
+      const key = `${Math.min(from, to)}-${Math.max(from, to)}`;
+      return pongEdges.has(key) && !isPongOccupiedInState(to, state);
+    }
+
+    function getPongLegalMovesForState(player, state) {
+      const moves = [];
+      state[player].forEach((from) => {
+        pongPositions.forEach((_, to) => {
+          if (isPongMoveValidInState(from, to, state)) {
+            moves.push({ from, to });
+          }
+        });
+      });
+      return moves;
+    }
+
+    function getPongLegalMoves(player) {
+      return getPongLegalMovesForState(player, pongPieces);
+    }
+
+    function getRandomPongMove(moves) {
+      return moves[Math.floor(Math.random() * moves.length)];
+    }
+
+    function chooseComputerMove(moves) {
+      for (const move of moves) {
+        const simulated = {
+          red: [...pongPieces.red],
+          blue: [...pongPieces.blue]
+        };
+        const index = simulated.blue.indexOf(move.from);
+        simulated.blue[index] = move.to;
+        if (getPongLegalMovesForState("red", simulated).length === 0) {
+          return move;
+        }
+      }
+      return getRandomPongMove(moves);
+    }
+
+    function finishPongTurn() {
+      const possibleMoves = getPongLegalMoves(pongCurrent);
+      if (possibleMoves.length === 0) {
+        pongWinner = pongCurrent === "red" ? "blue" : "red";
+      }
+    }
+
+    function triggerComputerMove() {
+      if (pongMode !== "computer" || pongCurrent !== "blue" || pongWinner || pongAiThinking) return;
+
+      const moves = getPongLegalMoves("blue");
+      if (moves.length === 0) {
+        pongWinner = "red";
+        drawPongBoard();
+        return;
+      }
+
+      pongAiThinking = true;
+      drawPongBoard();
+
+      pongAiTimeoutId = window.setTimeout(() => {
+        const move = chooseComputerMove(moves);
+        const pieceIndex = pongPieces.blue.indexOf(move.from);
+        pongPieces.blue[pieceIndex] = move.to;
+        pongSelected = null;
+        pongAiThinking = false;
+        pongAiTimeoutId = null;
+        pongCurrent = "red";
+        finishPongTurn();
+        drawPongBoard();
+      }, 500);
+    }
+
+    function resetPongGame() {
+      if (pongAiTimeoutId !== null) {
+        clearTimeout(pongAiTimeoutId);
+        pongAiTimeoutId = null;
+      }
+      pongPieces = createInitialPongPieces();
+      pongSelected = null;
+      pongCurrent = "red";
+      pongWinner = null;
+      pongAiThinking = false;
+      drawPongBoard();
+    }
+
+    function drawPongBoard() {
+      pongCtx.clearRect(0, 0, pongCanvas.width, pongCanvas.height);
+
+      pongEdges.forEach((edge) => {
+        const [aNode, bNode] = edge.split("-").map(Number);
+        const [x1, y1] = pongPositions[aNode];
+        const [x2, y2] = pongPositions[bNode];
+        pongCtx.strokeStyle = "#888";
+        pongCtx.lineWidth = 2;
+        pongCtx.beginPath();
+        pongCtx.moveTo(x1, y1);
+        pongCtx.lineTo(x2, y2);
+        pongCtx.stroke();
+      });
+
+      pongPositions.forEach(([x, y]) => {
+        pongCtx.fillStyle = "#fff";
+        pongCtx.beginPath();
+        pongCtx.arc(x, y, 20, 0, 2 * Math.PI);
+        pongCtx.fill();
+        pongCtx.strokeStyle = "#bbb";
+        pongCtx.stroke();
+      });
+
+      for (const [player, posArray] of Object.entries(pongPieces)) {
+        pongCtx.fillStyle = player;
+        posArray.forEach((position) => {
+          const [x, y] = pongPositions[position];
+          pongCtx.beginPath();
+          pongCtx.arc(x, y, 14, 0, 2 * Math.PI);
+          pongCtx.fill();
+
+          if (position === pongSelected) {
+            pongCtx.lineWidth = 3;
+            pongCtx.strokeStyle = "#000";
+            pongCtx.stroke();
+          }
+        });
+      }
+
+      const statusEl = document.getElementById("pongStatus");
+      if (pongWinner) {
+        statusEl.textContent = `Gewonnen: ${getPongPlayerLabel(pongWinner)}`;
+      } else if (pongAiThinking) {
+        statusEl.textContent = "Computer denkt...";
+      } else {
+        statusEl.textContent = `Am Zug: ${getPongPlayerLabel(pongCurrent)}`;
+      }
+    }
+
+    function isPongMoveValid(from, to) {
+      return isPongMoveValidInState(from, to, pongPieces);
+    }
+
+    pongCanvas.addEventListener("click", (event) => {
+      if (pongWinner || pongAiThinking) return;
+      if (pongMode === "computer" && pongCurrent === "blue") return;
+
+      const rect = pongCanvas.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+
+      const clicked = pongPositions.findIndex(([px, py]) => {
+        const distance = Math.sqrt((px - x) ** 2 + (py - y) ** 2);
+        return distance < 30;
+      });
+
+      if (clicked === -1) return;
+
+      const playerPieces = pongPieces[pongCurrent];
+
+      if (playerPieces.includes(clicked)) {
+        pongSelected = pongSelected === clicked ? null : clicked;
+      } else if (pongSelected !== null && isPongMoveValid(pongSelected, clicked)) {
+        const idx = playerPieces.indexOf(pongSelected);
+        playerPieces[idx] = clicked;
+        pongSelected = null;
+        pongCurrent = pongCurrent === "red" ? "blue" : "red";
+        finishPongTurn();
+      }
+
+      drawPongBoard();
+      triggerComputerMove();
+    });
+
+    document.getElementById("pongMode").addEventListener("change", (event) => {
+      pongMode = event.target.value;
+      resetPongGame();
+    });
+
+    document.getElementById("pongReset").addEventListener("click", resetPongGame);
+
+    drawPongBoard();
+  </script>
+</body>
+</html>

@@ -1,0 +1,333 @@
+body {
+  font-family: "Nunito", "Trebuchet MS", Arial, sans-serif;
+  background:
+    radial-gradient(circle at top, rgba(255, 236, 245, 0.95), rgba(255, 250, 245, 0.98) 36%),
+    linear-gradient(180deg, #fffaf5 0%, #fff7fb 100%);
+  color: #333;
+  margin: 0;
+  min-height: 100vh;
+}
+
+a {
+  color: inherit;
+}
+
+.site-header {
+  background: linear-gradient(135deg, #ffe2ec 0%, #ffd7ef 52%, #fff4d6 100%);
+  padding: 28px 20px 24px;
+  text-align: center;
+  border-bottom: 4px solid #e91e63;
+}
+
+.site-header h1 {
+  margin: 0;
+  font-size: clamp(2.4rem, 6vw, 4rem);
+  color: #d81b60;
+}
+
+.site-header p {
+  margin: 10px auto 0;
+  max-width: 720px;
+  font-size: 1.08rem;
+  line-height: 1.55;
+  color: #7a1240;
+}
+
+.site-nav {
+  background: rgba(248, 187, 208, 0.94);
+  padding: 12px 16px;
+  text-align: center;
+  border-bottom: 2px solid #e91e63;
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  backdrop-filter: blur(8px);
+}
+
+.site-nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: inline-flex;
+  gap: 14px 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.site-nav a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  font-weight: 800;
+  color: #b01256;
+  padding: 8px 14px;
+  border-radius: 999px;
+}
+
+.site-nav a:hover,
+.site-nav a[aria-current="page"] {
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: inset 0 0 0 2px rgba(216, 27, 96, 0.16);
+}
+
+main {
+  padding: 24px 20px 40px;
+  max-width: 1140px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.page-hero {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(255, 239, 247, 0.96));
+  border: 2px solid rgba(233, 30, 99, 0.18);
+  border-radius: 28px;
+  padding: 28px;
+  box-shadow: 0 20px 45px rgba(216, 27, 96, 0.1);
+}
+
+.page-hero h2 {
+  margin: 0 0 12px;
+  color: #c2185b;
+  font-size: clamp(1.8rem, 4vw, 2.7rem);
+}
+
+.page-hero p {
+  margin: 0;
+  max-width: 760px;
+  line-height: 1.6;
+}
+
+.page-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.pill-link,
+.feature-card a,
+.hero-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: #d81b60;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 800;
+  box-shadow: 0 10px 22px rgba(216, 27, 96, 0.22);
+}
+
+.pill-link.is-secondary,
+.feature-card a.is-secondary {
+  background: #fff;
+  color: #b01256;
+  box-shadow: inset 0 0 0 2px rgba(216, 27, 96, 0.2);
+}
+
+.journal-section {
+  margin: 0;
+  padding: 30px 0;
+  scroll-margin-top: 96px;
+}
+
+.journal-section + .journal-section {
+  border-top: 1px solid rgba(233, 30, 99, 0.16);
+}
+
+.journal-section h2 {
+  margin: 0 0 12px;
+  color: #d81b60;
+}
+
+.section-copy {
+  max-width: 780px;
+  line-height: 1.55;
+  margin: 0 0 16px;
+}
+
+.feature-grid,
+.preview-grid,
+.issue-grid,
+.digital-journal,
+.fashion-sketches,
+.advent-gallery {
+  display: grid;
+  gap: 18px;
+}
+
+.feature-grid {
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+.feature-card,
+.issue-card,
+.advent-card {
+  background: rgba(255, 255, 255, 0.92);
+  border: 2px solid rgba(248, 187, 208, 0.92);
+  border-radius: 22px;
+  padding: 18px;
+  box-shadow: 0 14px 30px rgba(216, 27, 96, 0.08);
+}
+
+.feature-card h3,
+.issue-card h3 {
+  margin-top: 0;
+  color: #b01256;
+}
+
+.feature-card p,
+.issue-card p,
+.advent-card figcaption {
+  line-height: 1.5;
+  color: #7a1240;
+}
+
+.preview-grid {
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  margin-top: 16px;
+}
+
+.preview-grid img,
+.fashion-sketches img,
+.digital-journal img,
+.advent-card img {
+  width: 100%;
+  display: block;
+  border-radius: 14px;
+  border: 2px solid #e91e63;
+  background: #fff;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+}
+
+.preview-grid img {
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+}
+
+.fashion-sketches {
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+.fashion-sketches img {
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+}
+
+.issue-grid {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.digital-journal {
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+.digital-journal img {
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  cursor: zoom-in;
+}
+
+.advent-gallery {
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  margin-top: 20px;
+}
+
+.advent-card {
+  margin: 0;
+  padding: 12px;
+  background: linear-gradient(180deg, #fffdf7 0%, #fff3f7 100%);
+}
+
+.advent-card img {
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  cursor: zoom-in;
+}
+
+.advent-card figcaption {
+  margin-top: 10px;
+  text-align: center;
+  font-weight: 800;
+}
+
+.gallery-note {
+  font-size: 0.98rem;
+  color: #7a1240;
+}
+
+.zoomable {
+  cursor: zoom-in;
+}
+
+#zoomModal {
+  display: none;
+  position: fixed;
+  z-index: 9999;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+#zoomModal img {
+  max-width: min(96vw, 1100px);
+  max-height: 92vh;
+  border: 4px solid #fff;
+  border-radius: 16px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+}
+
+footer {
+  margin-top: 30px;
+  padding: 20px;
+  text-align: center;
+  background: #fce4ec;
+  border-top: 3px solid #e91e63;
+  color: #7a1240;
+  font-size: 0.95rem;
+}
+
+.privacy-note {
+  margin: 0 auto;
+  max-width: 900px;
+  line-height: 1.5;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 3px solid rgba(216, 27, 96, 0.42);
+  outline-offset: 2px;
+}
+
+@media (max-width: 700px) {
+  .site-nav ul {
+    gap: 10px 12px;
+  }
+
+  .site-nav a {
+    padding: 7px 12px;
+    font-size: 0.95rem;
+  }
+
+  main {
+    padding: 16px 14px 28px;
+  }
+
+  .page-hero,
+  .feature-card,
+  .issue-card {
+    padding: 18px;
+  }
+
+  .advent-gallery,
+  .issue-grid {
+    gap: 14px;
+  }
+}
