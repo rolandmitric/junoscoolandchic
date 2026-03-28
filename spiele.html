@@ -305,6 +305,30 @@
       font-size: 0.92rem;
     }
 
+    .equivalent-layout {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 14px;
+      margin: 12px 0 8px;
+    }
+
+    .equivalent-column {
+      background: rgba(255, 255, 255, 0.34);
+      border: 1px solid #f4a3c1;
+      border-radius: 14px;
+      padding: 10px;
+    }
+
+    .equivalent-column h4 {
+      margin: 0 0 6px;
+      color: #7a1240;
+      font-size: 1rem;
+    }
+
+    .equivalent-column .triangulation-board {
+      margin-top: 0;
+    }
+
     @media (max-width: 640px) {
       #grid {
         grid-template-columns: repeat(10, 20px);
@@ -349,6 +373,7 @@
           <button id="tab-divide" onclick="setMathMode('divide')">Süßigkeiten-Teiler</button>
           <button id="tab-subdivide" onclick="setMathMode('subdivide')">Division durch Subtraktion</button>
           <button id="tab-triangulation" onclick="setMathMode('triangulation')">Dreiecks-Zähler</button>
+          <button id="tab-equivalent" onclick="setMathMode('equivalent')">Zwei Triangulierungen</button>
         </div>
 
         <div id="math-plusminus-panel" class="math-panel active">
@@ -437,6 +462,35 @@
             <button onclick="newTriangulationProblem()">Neue Aufgabe</button>
           </div>
           <p class="math-status" id="triangulation-status"></p>
+        </div>
+
+        <div id="math-equivalent-panel" class="math-panel">
+          <h3>Zwei Triangulierungen</h3>
+          <p id="equivalent-story" class="triangulation-story"></p>
+          <div class="equivalent-layout">
+            <div class="equivalent-column">
+              <h4>Triangulierung A</h4>
+              <div id="equivalent-board-a" class="triangulation-board"></div>
+              <div class="math-controls">
+                <button onclick="undoEquivalentTriangle('a')">A: Zurück</button>
+                <button onclick="resetEquivalentSide('a')">A: Leeren</button>
+              </div>
+            </div>
+            <div class="equivalent-column">
+              <h4>Triangulierung B</h4>
+              <div id="equivalent-board-b" class="triangulation-board"></div>
+              <div class="math-controls">
+                <button onclick="undoEquivalentTriangle('b')">B: Zurück</button>
+                <button onclick="resetEquivalentSide('b')">B: Leeren</button>
+              </div>
+            </div>
+          </div>
+          <p class="triangulation-note">Bedecke beide Figuren vollständig. Rechts muss eine andere Triangulierung sein als links.</p>
+          <div class="math-controls">
+            <button onclick="checkEquivalentTriangulations()">Prüfen</button>
+            <button onclick="newEquivalentProblem()">Neue Aufgabe</button>
+          </div>
+          <p class="math-status" id="equivalent-status"></p>
         </div>
       </div>
     </section>
@@ -545,7 +599,6 @@
     let subdivideBalls = [];
     let subdivideSelected = new Set();
     let triangulationFigureTriangles = [];
-    let triangulationFigureTriangleSet = new Set();
     let triangulationFigureSquareRequirements = new Map();
     let triangulationPlacedTriangles = [];
     let triangulationPlacedTriangleSet = new Set();
@@ -553,6 +606,23 @@
     let triangulationGridBounds = null;
     let triangulationExpectedTriangles = 0;
     let triangulationStreak = 0;
+    let equivalentFigureTriangles = [];
+    let equivalentFigureSquareRequirements = new Map();
+    let equivalentGridBounds = null;
+    let equivalentExpectedTriangles = 0;
+    let equivalentStreak = 0;
+    let equivalentSides = {
+      a: {
+        placedTriangles: [],
+        placedTriangleSet: new Set(),
+        selectedPoints: []
+      },
+      b: {
+        placedTriangles: [],
+        placedTriangleSet: new Set(),
+        selectedPoints: []
+      }
+    };
 
     const multiplyThemes = [
       { emoji: "⭐", item: "Sterne" },
@@ -582,6 +652,18 @@
       [2, 3, 0]
     ];
 
+    const equivalentFallbackShape = [
+      [0, 0, 2],
+      [0, 0, 0],
+      [1, 0, 1],
+      [1, 1, 3],
+      [1, 1, 1],
+      [2, 1, 2],
+      [2, 2, 0],
+      [3, 2, 3],
+      [3, 3, 1]
+    ];
+
     function celebrate() {
       if (typeof confetti === "function") {
         confetti({ particleCount: 120, spread: 75, origin: { y: 0.6 } });
@@ -596,7 +678,7 @@
 
     function setMathMode(mode) {
       mathMode = mode;
-      const modes = ["plusminus", "multiply", "divide", "subdivide", "triangulation"];
+      const modes = ["plusminus", "multiply", "divide", "subdivide", "triangulation", "equivalent"];
       modes.forEach((name) => {
         document.getElementById(`tab-${name}`).classList.toggle("active", name === mode);
         document.getElementById(`math-${name}-panel`).classList.toggle("active", name === mode);
@@ -607,6 +689,7 @@
       if (mode === "divide") newDivisionProblem();
       if (mode === "subdivide") newSubdivideProblem();
       if (mode === "triangulation") newTriangulationProblem();
+      if (mode === "equivalent") newEquivalentProblem();
     }
 
     function newProblem() {
@@ -1349,22 +1432,22 @@
       return requirements;
     }
 
-    function getPlacedTriangulationBySquare() {
+    function getPlacedTriangulationBySquare(placedTriangles = triangulationPlacedTriangles) {
       const grouped = new Map();
-      triangulationPlacedTriangles.forEach((triangle) => {
+      placedTriangles.forEach((triangle) => {
         if (!grouped.has(triangle.squareKey)) grouped.set(triangle.squareKey, []);
         grouped.get(triangle.squareKey).push(triangle);
       });
       return grouped;
     }
 
-    function validateTriangulationCandidate(candidate) {
-      const requirement = triangulationFigureSquareRequirements.get(candidate.squareKey);
+    function validateTriangulationCandidateWithState(candidate, squareRequirements, placedTriangles) {
+      const requirement = squareRequirements.get(candidate.squareKey);
       if (!requirement) {
         return { ok: false, error: "Dieses Dreieck gehört nicht zur Figur." };
       }
 
-      const placedBySquare = getPlacedTriangulationBySquare();
+      const placedBySquare = getPlacedTriangulationBySquare(placedTriangles);
       const existing = placedBySquare.get(candidate.squareKey) || [];
 
       if (requirement.type === "single") {
@@ -1407,14 +1490,27 @@
       return { ok: false, error: "Dieses Dreieck gehört nicht zur Figur." };
     }
 
-    function isTriangulationCovered() {
-      if (triangulationFigureTriangles.length === 0) return false;
-      if (triangulationPlacedTriangles.length !== triangulationExpectedTriangles) return false;
+    function validateTriangulationCandidate(candidate) {
+      return validateTriangulationCandidateWithState(
+        candidate,
+        triangulationFigureSquareRequirements,
+        triangulationPlacedTriangles
+      );
+    }
 
-      const placedBySquare = getPlacedTriangulationBySquare();
-      if (placedBySquare.size !== triangulationFigureSquareRequirements.size) return false;
+    function isTriangulationCoveredForState(
+      figureTriangles,
+      expectedTriangles,
+      squareRequirements,
+      placedTriangles
+    ) {
+      if (figureTriangles.length === 0) return false;
+      if (placedTriangles.length !== expectedTriangles) return false;
 
-      for (const [squareKey, requirement] of triangulationFigureSquareRequirements.entries()) {
+      const placedBySquare = getPlacedTriangulationBySquare(placedTriangles);
+      if (placedBySquare.size !== squareRequirements.size) return false;
+
+      for (const [squareKey, requirement] of squareRequirements.entries()) {
         const placed = placedBySquare.get(squareKey) || [];
         if (requirement.type === "single") {
           if (placed.length !== 1) return false;
@@ -1444,16 +1540,53 @@
       return true;
     }
 
-    function getTriangulationBoundaryEdges() {
-      return triangulationBoundaryEdgesForTriangles(triangulationFigureTriangles);
+    function isTriangulationCovered() {
+      return isTriangulationCoveredForState(
+        triangulationFigureTriangles,
+        triangulationExpectedTriangles,
+        triangulationFigureSquareRequirements,
+        triangulationPlacedTriangles
+      );
     }
 
-    function renderTriangulationBoard() {
-      const board = document.getElementById("triangulation-board");
-      if (!board || !triangulationGridBounds) return;
+    function buildTriangulationGridBounds(triangles) {
+      if (triangles.length === 0) return null;
+      const allPoints = triangles.flatMap((triangle) => triangle.points);
+      const minFigureX = Math.min(...allPoints.map((point) => point.x));
+      const minFigureY = Math.min(...allPoints.map((point) => point.y));
+      const maxFigureX = Math.max(...allPoints.map((point) => point.x));
+      const maxFigureY = Math.max(...allPoints.map((point) => point.y));
+      const minX = minFigureX - 1;
+      const minY = minFigureY - 1;
+      const maxX = maxFigureX + 1;
+      const maxY = maxFigureY + 1;
+      const step = 54;
+      const padding = 26;
+      return {
+        minX,
+        minY,
+        maxX,
+        maxY,
+        step,
+        padding,
+        width: (maxX - minX) * step + padding * 2,
+        height: (maxY - minY) * step + padding * 2
+      };
+    }
+
+    function renderTriangulationBoardState(
+      boardId,
+      figureTriangles,
+      gridBounds,
+      placedTriangles,
+      selectedPoints,
+      clickHandler
+    ) {
+      const board = document.getElementById(boardId);
+      if (!board || !gridBounds) return;
 
       const svgNS = "http://www.w3.org/2000/svg";
-      const bounds = triangulationGridBounds;
+      const bounds = gridBounds;
       const toPx = (point) => ({
         x: bounds.padding + (point.x - bounds.minX) * bounds.step,
         y: bounds.padding + (point.y - bounds.minY) * bounds.step
@@ -1491,7 +1624,7 @@
         svg.appendChild(line);
       }
 
-      triangulationFigureTriangles.forEach((triangle) => {
+      figureTriangles.forEach((triangle) => {
         const triEl = document.createElementNS(svgNS, "polygon");
         triEl.setAttribute(
           "points",
@@ -1504,7 +1637,7 @@
         svg.appendChild(triEl);
       });
 
-      triangulationPlacedTriangles.forEach((triangle) => {
+      placedTriangles.forEach((triangle) => {
         const triEl = document.createElementNS(svgNS, "polygon");
         triEl.setAttribute(
           "points",
@@ -1519,7 +1652,7 @@
         svg.appendChild(triEl);
       });
 
-      getTriangulationBoundaryEdges().forEach((edge) => {
+      triangulationBoundaryEdgesForTriangles(figureTriangles).forEach((edge) => {
         const from = toPx({ x: edge.x1, y: edge.y1 });
         const to = toPx({ x: edge.x2, y: edge.y2 });
         const line = document.createElementNS(svgNS, "line");
@@ -1534,7 +1667,7 @@
 
       for (let y = bounds.minY; y <= bounds.maxY; y++) {
         for (let x = bounds.minX; x <= bounds.maxX; x++) {
-          const isSelected = triangulationSelectedPoints.some(
+          const isSelected = selectedPoints.some(
             (point) => point.x === x && point.y === y
           );
           const center = toPx({ x, y });
@@ -1544,7 +1677,7 @@
           hitArea.setAttribute("r", isSelected ? "12.6" : "11.2");
           hitArea.setAttribute("fill", "rgba(0, 0, 0, 0)");
           hitArea.style.cursor = "pointer";
-          hitArea.addEventListener("click", () => handleTriangulationPointClick(x, y));
+          hitArea.addEventListener("click", () => clickHandler(x, y));
           svg.appendChild(hitArea);
 
           const dot = document.createElementNS(svgNS, "circle");
@@ -1558,6 +1691,17 @@
       }
 
       board.appendChild(svg);
+    }
+
+    function renderTriangulationBoard() {
+      renderTriangulationBoardState(
+        "triangulation-board",
+        triangulationFigureTriangles,
+        triangulationGridBounds,
+        triangulationPlacedTriangles,
+        triangulationSelectedPoints,
+        handleTriangulationPointClick
+      );
     }
 
     function handleTriangulationPointClick(x, y) {
@@ -1655,36 +1799,12 @@
       triangulationFigureTriangles = template.map(([x, y, omittedCorner]) =>
         buildTriangleFromDescriptor(x, y, omittedCorner)
       );
-      triangulationFigureTriangleSet = new Set(
-        triangulationFigureTriangles.map((triangle) => triangulationTriangleKey(triangle))
-      );
       triangulationFigureSquareRequirements = buildTriangulationSquareRequirements(triangulationFigureTriangles);
       triangulationPlacedTriangles = [];
       triangulationPlacedTriangleSet = new Set();
       triangulationSelectedPoints = [];
       triangulationExpectedTriangles = triangulationFigureTriangles.length;
-
-      const allPoints = triangulationFigureTriangles.flatMap((triangle) => triangle.points);
-      const minFigureX = Math.min(...allPoints.map((point) => point.x));
-      const minFigureY = Math.min(...allPoints.map((point) => point.y));
-      const maxFigureX = Math.max(...allPoints.map((point) => point.x));
-      const maxFigureY = Math.max(...allPoints.map((point) => point.y));
-      const minX = minFigureX - 1;
-      const minY = minFigureY - 1;
-      const maxX = maxFigureX + 1;
-      const maxY = maxFigureY + 1;
-      const step = 54;
-      const padding = 26;
-      triangulationGridBounds = {
-        minX,
-        minY,
-        maxX,
-        maxY,
-        step,
-        padding,
-        width: (maxX - minX) * step + padding * 2,
-        height: (maxY - minY) * step + padding * 2
-      };
+      triangulationGridBounds = buildTriangulationGridBounds(triangulationFigureTriangles);
 
       document.getElementById("triangulation-answer").value = "";
       document.getElementById("triangulation-story").textContent =
@@ -1727,6 +1847,220 @@
           "#ad1457"
         );
       }
+    }
+
+    function equivalentSideLabel(side) {
+      return side === "a" ? "A" : "B";
+    }
+
+    function isEquivalentSideCovered(side) {
+      const sideState = equivalentSides[side];
+      return isTriangulationCoveredForState(
+        equivalentFigureTriangles,
+        equivalentExpectedTriangles,
+        equivalentFigureSquareRequirements,
+        sideState.placedTriangles
+      );
+    }
+
+    function equivalentTriangulationsDifferent() {
+      const keysA = equivalentSides.a.placedTriangleSet;
+      const keysB = equivalentSides.b.placedTriangleSet;
+      if (keysA.size !== keysB.size) return true;
+      for (const key of keysA) {
+        if (!keysB.has(key)) return true;
+      }
+      return false;
+    }
+
+    function renderEquivalentBoards() {
+      renderTriangulationBoardState(
+        "equivalent-board-a",
+        equivalentFigureTriangles,
+        equivalentGridBounds,
+        equivalentSides.a.placedTriangles,
+        equivalentSides.a.selectedPoints,
+        (x, y) => handleEquivalentPointClick("a", x, y)
+      );
+
+      renderTriangulationBoardState(
+        "equivalent-board-b",
+        equivalentFigureTriangles,
+        equivalentGridBounds,
+        equivalentSides.b.placedTriangles,
+        equivalentSides.b.selectedPoints,
+        (x, y) => handleEquivalentPointClick("b", x, y)
+      );
+    }
+
+    function handleEquivalentPointClick(side, x, y) {
+      const sideState = equivalentSides[side];
+      if (!sideState || equivalentFigureTriangles.length === 0) return;
+
+      const existingIndex = sideState.selectedPoints.findIndex(
+        (point) => point.x === x && point.y === y
+      );
+
+      if (existingIndex >= 0) {
+        sideState.selectedPoints.splice(existingIndex, 1);
+        renderEquivalentBoards();
+        return;
+      }
+
+      sideState.selectedPoints.push({ x, y });
+      if (sideState.selectedPoints.length < 3) {
+        renderEquivalentBoards();
+        return;
+      }
+
+      const candidate = getTriangulationCandidate(sideState.selectedPoints);
+      sideState.selectedPoints = [];
+
+      if (candidate.error) {
+        setStatus("equivalent-status", `${equivalentSideLabel(side)}: ${candidate.error}`, "#ad1457");
+        renderEquivalentBoards();
+        return;
+      }
+
+      const candidateKey = triangulationTriangleKey(candidate);
+      if (sideState.placedTriangleSet.has(candidateKey)) {
+        setStatus("equivalent-status", `${equivalentSideLabel(side)}: Dieses Dreieck ist schon gesetzt.`, "#ad1457");
+        renderEquivalentBoards();
+        return;
+      }
+
+      const candidateValidation = validateTriangulationCandidateWithState(
+        candidate,
+        equivalentFigureSquareRequirements,
+        sideState.placedTriangles
+      );
+      if (!candidateValidation.ok) {
+        setStatus("equivalent-status", `${equivalentSideLabel(side)}: ${candidateValidation.error}`, "#ad1457");
+        renderEquivalentBoards();
+        return;
+      }
+
+      sideState.placedTriangles.push(candidate);
+      sideState.placedTriangleSet.add(candidateKey);
+      renderEquivalentBoards();
+
+      const coveredA = isEquivalentSideCovered("a");
+      const coveredB = isEquivalentSideCovered("b");
+      if (coveredA && coveredB) {
+        if (equivalentTriangulationsDifferent()) {
+          setStatus("equivalent-status", "Beide fertig und unterschiedlich. Jetzt prüfen!", "#1b5e20");
+        } else {
+          setStatus("equivalent-status", "Beide Seiten sind gleich. Ändere eine Seite für eine andere Triangulierung.", "#ad1457");
+        }
+        return;
+      }
+
+      if (isEquivalentSideCovered(side)) {
+        setStatus("equivalent-status", `Seite ${equivalentSideLabel(side)} ist komplett. Jetzt die andere Seite.`, "#1b5e20");
+      } else {
+        setStatus("equivalent-status", `Seite ${equivalentSideLabel(side)}: Dreieck gesetzt.`);
+      }
+    }
+
+    function resetEquivalentSide(side) {
+      const sideState = equivalentSides[side];
+      if (!sideState) return;
+      sideState.placedTriangles = [];
+      sideState.placedTriangleSet = new Set();
+      sideState.selectedPoints = [];
+      renderEquivalentBoards();
+      setStatus("equivalent-status", `Seite ${equivalentSideLabel(side)} wurde geleert.`);
+    }
+
+    function undoEquivalentTriangle(side) {
+      const sideState = equivalentSides[side];
+      if (!sideState) return;
+      const last = sideState.placedTriangles.pop();
+      if (!last) {
+        setStatus("equivalent-status", `Seite ${equivalentSideLabel(side)} hat noch kein gesetztes Dreieck.`, "#ad1457");
+        return;
+      }
+
+      sideState.placedTriangleSet.delete(triangulationTriangleKey(last));
+      sideState.selectedPoints = [];
+      renderEquivalentBoards();
+      setStatus("equivalent-status", `Seite ${equivalentSideLabel(side)}: letzter Schritt entfernt.`);
+    }
+
+    function newEquivalentProblem() {
+      const strictProfile = {
+        allowFullSquares: true,
+        minFullSquares: 2,
+        minDiagonalEdges: 1,
+        minStraightEdges: 2
+      };
+      const mediumProfile = {
+        allowFullSquares: true,
+        minFullSquares: 1,
+        minDiagonalEdges: 1,
+        minStraightEdges: 2
+      };
+      const fallbackProfile = {
+        allowFullSquares: true,
+        minFullSquares: 1,
+        minDiagonalEdges: 1,
+        minStraightEdges: 1
+      };
+
+      const template =
+        generateTriangulationTemplate(strictProfile) ||
+        generateTriangulationTemplate(mediumProfile) ||
+        generateTriangulationTemplate(fallbackProfile) ||
+        equivalentFallbackShape;
+
+      equivalentFigureTriangles = template.map(([x, y, omittedCorner]) =>
+        buildTriangleFromDescriptor(x, y, omittedCorner)
+      );
+      equivalentFigureSquareRequirements = buildTriangulationSquareRequirements(equivalentFigureTriangles);
+      equivalentExpectedTriangles = equivalentFigureTriangles.length;
+      equivalentGridBounds = buildTriangulationGridBounds(equivalentFigureTriangles);
+      equivalentSides = {
+        a: {
+          placedTriangles: [],
+          placedTriangleSet: new Set(),
+          selectedPoints: []
+        },
+        b: {
+          placedTriangles: [],
+          placedTriangleSet: new Set(),
+          selectedPoints: []
+        }
+      };
+
+      document.getElementById("equivalent-story").textContent =
+        `Trianguliere dieselbe Figur zweimal. Beide Seiten brauchen ${equivalentExpectedTriangles} Dreiecke.`;
+      renderEquivalentBoards();
+      setStatus("equivalent-status", `Serie: ${equivalentStreak} richtig in Folge.`);
+    }
+
+    function checkEquivalentTriangulations() {
+      const coveredA = isEquivalentSideCovered("a");
+      const coveredB = isEquivalentSideCovered("b");
+
+      if (!coveredA || !coveredB) {
+        setStatus("equivalent-status", "Bedecke zuerst links und rechts die ganze Figur.", "#ad1457");
+        return;
+      }
+
+      if (!equivalentTriangulationsDifferent()) {
+        equivalentStreak = 0;
+        setStatus("equivalent-status", "Die beiden Triangulierungen sind gleich. Versuche eine andere Zerlegung.", "#ad1457");
+        return;
+      }
+
+      equivalentStreak += 1;
+      celebrate();
+      setStatus(
+        "equivalent-status",
+        `Super! Zwei verschiedene Triangulierungen gefunden. Serie: ${equivalentStreak}`,
+        "#1b5e20"
+      );
+      setTimeout(newEquivalentProblem, 1400);
     }
 
     window.addEventListener("resize", () => {
