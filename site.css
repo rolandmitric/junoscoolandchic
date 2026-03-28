@@ -216,6 +216,22 @@ main {
   object-fit: cover;
 }
 
+.fashion-sketches img.full-fit-sketch {
+  aspect-ratio: 4 / 3;
+  object-fit: contain;
+}
+
+.other-sketches-grid {
+  grid-template-columns: 1fr;
+  justify-items: center;
+}
+
+.other-sketches-grid img {
+  width: min(100%, 460px);
+  aspect-ratio: auto;
+  object-fit: contain;
+}
+
 .issue-grid {
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 }
