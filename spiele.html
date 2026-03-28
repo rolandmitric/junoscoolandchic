@@ -396,7 +396,7 @@
           <button id="tab-subdivide" onclick="setMathMode('subdivide')">Division durch Subtraktion</button>
           <button id="tab-triangulation" onclick="setMathMode('triangulation')">Dreiecks-Zähler</button>
           <button id="tab-equivalent" onclick="setMathMode('equivalent')">Zwei Triangulierungen</button>
-          <button id="tab-pi" onclick="setMathMode('pi')">Pi-Band</button>
+          <button id="tab-pi" onclick="setMathMode('pi')">Kreiszaun</button>
         </div>
 
         <div id="math-plusminus-panel" class="math-panel active">
@@ -517,20 +517,21 @@
         </div>
 
         <div id="math-pi-panel" class="math-panel">
-          <h3>Pi-Band</h3>
+          <h3>Kreiszaun</h3>
           <p id="pi-story" class="triangulation-story"></p>
           <div id="pi-board" class="pi-board"></div>
-          <p id="pi-note" class="pi-note">Lege Durchmesser-Bänder am Rand an. Ein Band hat immer die Länge des Durchmessers.</p>
+          <p id="pi-note" class="pi-note">Baue mit Einheitsstäben einen Zaun um den Kreis. Dann vergleiche mit 3 × d.</p>
           <div class="math-controls">
-            <button onclick="placePiBand()">Band legen</button>
-            <button onclick="resetPiBands()">Bänder leeren</button>
+            <button onclick="placePiSticks(1)">+1 Stab</button>
+            <button onclick="placePiSticks(5)">+5 Stäbe</button>
+            <button onclick="resetPiSticks()">Zurücksetzen</button>
             <button onclick="newPiProblem()">Neue Aufgabe</button>
           </div>
           <div class="math-controls">
-            <label for="pi-whole-answer">Ganze Bänder:</label>
-            <input id="pi-whole-answer" class="math-input" type="number" min="0" />
             <label for="pi-product-answer">3 × d =</label>
             <input id="pi-product-answer" class="math-input" type="number" min="0" />
+            <label for="pi-count-answer">Zaun-Stäbe:</label>
+            <input id="pi-count-answer" class="math-input" type="number" min="0" />
             <button onclick="checkPiAnswer()">Prüfen</button>
           </div>
           <p class="math-status" id="pi-status"></p>
@@ -655,7 +656,8 @@
     let equivalentExpectedTriangles = 0;
     let equivalentStreak = 0;
     let piDiameter = 7;
-    let piBandsPlaced = 0;
+    let piSticksPlaced = 0;
+    let piTargetSticks = 22;
     let piStreak = 0;
     let equivalentSides = {
       a: {
@@ -710,7 +712,7 @@
       [3, 3, 1]
     ];
 
-    const piDiameters = [7, 14, 21];
+    const piDiameters = [6, 7, 8, 9, 10];
 
     function celebrate() {
       if (typeof confetti === "function") {
@@ -2138,14 +2140,15 @@
       const cy = 170;
       const radius = 48 + piDiameter * 2.7;
       const startAngle = -Math.PI / 2;
-      const segmentAngle = 2;
-      const fullTurns = Math.min(piBandsPlaced, 3);
+      const closed = piSticksPlaced >= piTargetSticks;
+      const progressRatio = piTargetSticks === 0 ? 0 : Math.min(1, piSticksPlaced / piTargetSticks);
+      const progressAngle = progressRatio * Math.PI * 2;
 
       board.innerHTML = "";
       const svg = document.createElementNS(svgNS, "svg");
       svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
       svg.setAttribute("role", "img");
-      svg.setAttribute("aria-label", "Pi-Band: Wie oft passt der Durchmesser an den Kreisrand?");
+      svg.setAttribute("aria-label", "Kreiszaun mit Einheitsstäben");
 
       const circle = document.createElementNS(svgNS, "circle");
       circle.setAttribute("cx", String(cx));
@@ -2175,44 +2178,48 @@
       diameterLabel.textContent = `d = ${piDiameter}`;
       svg.appendChild(diameterLabel);
 
-      const segmentColors = ["#d81b60", "#f06292", "#ef6c00"];
-      for (let i = 0; i < fullTurns; i++) {
-        const start = startAngle + i * segmentAngle;
-        const end = start + segmentAngle;
-        const arc = document.createElementNS(svgNS, "path");
-        arc.setAttribute("d", piDescribeArc(cx, cy, radius, start, end));
-        arc.setAttribute("fill", "none");
-        arc.setAttribute("stroke", segmentColors[i % segmentColors.length]);
-        arc.setAttribute("stroke-width", "12");
-        arc.setAttribute("stroke-linecap", "round");
-        svg.appendChild(arc);
+      if (progressAngle > 0.001) {
+        if (closed) {
+          const closedArc = document.createElementNS(svgNS, "circle");
+          closedArc.setAttribute("cx", String(cx));
+          closedArc.setAttribute("cy", String(cy));
+          closedArc.setAttribute("r", String(radius));
+          closedArc.setAttribute("fill", "none");
+          closedArc.setAttribute("stroke", "#d81b60");
+          closedArc.setAttribute("stroke-width", "12");
+          svg.appendChild(closedArc);
+        } else {
+          const progressArc = document.createElementNS(svgNS, "path");
+          progressArc.setAttribute(
+            "d",
+            piDescribeArc(cx, cy, radius, startAngle, startAngle + progressAngle)
+          );
+          progressArc.setAttribute("fill", "none");
+          progressArc.setAttribute("stroke", "#d81b60");
+          progressArc.setAttribute("stroke-width", "12");
+          progressArc.setAttribute("stroke-linecap", "round");
+          svg.appendChild(progressArc);
+        }
       }
 
-      if (piBandsPlaced >= 3) {
-        const restArc = document.createElementNS(svgNS, "path");
-        restArc.setAttribute(
-          "d",
-          piDescribeArc(cx, cy, radius, startAngle + 3 * segmentAngle, startAngle + 2 * Math.PI)
-        );
-        restArc.setAttribute("fill", "none");
-        restArc.setAttribute("stroke", "#f9a825");
-        restArc.setAttribute("stroke-width", "12");
-        restArc.setAttribute("stroke-linecap", "round");
-        svg.appendChild(restArc);
-
-        const restLabel = document.createElementNS(svgNS, "text");
-        restLabel.setAttribute("x", String(cx + radius + 14));
-        restLabel.setAttribute("y", String(cy - radius + 16));
-        restLabel.setAttribute("fill", "#8d6e00");
-        restLabel.setAttribute("font-size", "16");
-        restLabel.setAttribute("font-weight", "700");
-        restLabel.textContent = "Rest";
-        svg.appendChild(restLabel);
+      for (let i = 0; i < piSticksPlaced; i++) {
+        const t = piTargetSticks === 0 ? 0 : i / piTargetSticks;
+        const angle = startAngle + t * Math.PI * 2;
+        const inner = piPolarPoint(cx, cy, radius + 8, angle);
+        const outer = piPolarPoint(cx, cy, radius + 22, angle);
+        const stick = document.createElementNS(svgNS, "line");
+        stick.setAttribute("x1", String(inner.x));
+        stick.setAttribute("y1", String(inner.y));
+        stick.setAttribute("x2", String(outer.x));
+        stick.setAttribute("y2", String(outer.y));
+        stick.setAttribute("stroke", "#ad1457");
+        stick.setAttribute("stroke-width", "3");
+        svg.appendChild(stick);
       }
 
       const barX = 430;
       const barY = 120;
-      const barLen = piDiameter * 9;
+      const barLen = piDiameter * 10;
       const bandBar = document.createElementNS(svgNS, "rect");
       bandBar.setAttribute("x", String(barX));
       bandBar.setAttribute("y", String(barY));
@@ -2231,7 +2238,7 @@
       bandLabel.setAttribute("fill", "#7a1240");
       bandLabel.setAttribute("font-size", "15");
       bandLabel.setAttribute("font-weight", "700");
-      bandLabel.textContent = `Ein Band: Länge d = ${piDiameter}`;
+      bandLabel.textContent = "Ein Zaunstab = 1 Längeneinheit";
       svg.appendChild(bandLabel);
 
       const infoLine = document.createElementNS(svgNS, "text");
@@ -2240,82 +2247,100 @@
       infoLine.setAttribute("fill", "#7a1240");
       infoLine.setAttribute("font-size", "16");
       infoLine.setAttribute("font-weight", "700");
-      infoLine.textContent = `Gelegt: ${piBandsPlaced} Band${piBandsPlaced === 1 ? "" : "er"}`;
+      infoLine.textContent = `Gelegte Stäbe: ${piSticksPlaced}`;
       svg.appendChild(infoLine);
+
+      const goalLine = document.createElementNS(svgNS, "text");
+      goalLine.setAttribute("x", String(barX));
+      goalLine.setAttribute("y", String(barY + 86));
+      goalLine.setAttribute("fill", closed ? "#1b5e20" : "#7a1240");
+      goalLine.setAttribute("font-size", "16");
+      goalLine.setAttribute("font-weight", "700");
+      goalLine.textContent = closed ? "Zaun ist geschlossen!" : "Baue weiter, bis der Zaun zu ist.";
+      svg.appendChild(goalLine);
+
+      const compareLine = document.createElementNS(svgNS, "text");
+      compareLine.setAttribute("x", String(barX));
+      compareLine.setAttribute("y", String(barY + 114));
+      compareLine.setAttribute("fill", "#7a1240");
+      compareLine.setAttribute("font-size", "15");
+      compareLine.setAttribute("font-weight", "700");
+      compareLine.textContent = `Zum Vergleichen: 3 × d = ${3 * piDiameter}`;
+      svg.appendChild(compareLine);
 
       board.appendChild(svg);
     }
 
     function newPiProblem() {
       piDiameter = piDiameters[Math.floor(Math.random() * piDiameters.length)];
-      piBandsPlaced = 0;
-      document.getElementById("pi-whole-answer").value = "";
+      piTargetSticks = Math.round(Math.PI * piDiameter);
+      piSticksPlaced = 0;
       document.getElementById("pi-product-answer").value = "";
+      document.getElementById("pi-count-answer").value = "";
       document.getElementById("pi-story").textContent =
-        `Der Kreis hat Durchmesser d = ${piDiameter}. Lege Durchmesser-Bänder am Rand an und beobachte, was passiert.`;
+        `Der Kreis hat Durchmesser d = ${piDiameter}. Baue einen Zaun aus Einheitsstäben um den Kreis.`;
       document.getElementById("pi-note").textContent =
-        "Lege 3 Bänder. Dann bleibt noch ein kleines Reststück am Rand übrig.";
+        "Wenn der Zaun geschlossen ist, vergleiche deine Stäbe mit 3 × d.";
       renderPiBoard();
       setStatus("pi-status", `Serie: ${piStreak} richtig in Folge.`);
     }
 
-    function placePiBand() {
-      if (piBandsPlaced >= 3) {
-        setStatus("pi-status", "Drei Bänder sind gelegt. Jetzt die Antworten eintragen.", "#ad1457");
+    function placePiSticks(step) {
+      if (piSticksPlaced >= piTargetSticks) {
+        setStatus("pi-status", "Zaun ist schon geschlossen. Jetzt unten prüfen.", "#ad1457");
         return;
       }
 
-      piBandsPlaced += 1;
+      const increment = Math.max(1, step || 1);
+      piSticksPlaced = Math.min(piTargetSticks, piSticksPlaced + increment);
       renderPiBoard();
-      if (piBandsPlaced < 3) {
-        setStatus("pi-status", `Band ${piBandsPlaced} gelegt. Lege noch weiter.`);
+      if (piSticksPlaced < piTargetSticks) {
+        const left = piTargetSticks - piSticksPlaced;
+        setStatus("pi-status", `${piSticksPlaced} Stäbe gesetzt. Noch ${left} bis der Zaun zu ist.`);
         return;
       }
 
       document.getElementById("pi-note").textContent =
-        "Jetzt sieht man: 3 ganze Durchmesser-Bänder passen herum, und ein Reststück bleibt.";
-      setStatus("pi-status", "Sehr gut! Trag jetzt „Ganze Bänder“ und „3 × d“ ein.", "#1b5e20");
+        "Zaun geschlossen! Jetzt vergleichen: Ist 3 × d kleiner als dein Zaun?";
+      setStatus("pi-status", "Geschafft. Trag jetzt 3 × d und deine Zaun-Stäbe ein.", "#1b5e20");
     }
 
-    function resetPiBands() {
-      piBandsPlaced = 0;
+    function resetPiSticks() {
+      piSticksPlaced = 0;
       renderPiBoard();
-      setStatus("pi-status", "Bänder geleert. Fang noch einmal an.");
+      setStatus("pi-status", "Zaun zurückgesetzt. Fang noch einmal an.");
     }
 
     function checkPiAnswer() {
-      if (piBandsPlaced < 3) {
-        setStatus("pi-status", "Lege zuerst 3 Bänder am Kreisrand an.", "#ad1457");
+      if (piSticksPlaced < piTargetSticks) {
+        setStatus("pi-status", "Schließe zuerst den Zaun um den Kreis.", "#ad1457");
         return;
       }
 
-      const whole = parseInt(document.getElementById("pi-whole-answer").value, 10);
       const product = parseInt(document.getElementById("pi-product-answer").value, 10);
-      if (Number.isNaN(whole) || Number.isNaN(product)) {
+      const count = parseInt(document.getElementById("pi-count-answer").value, 10);
+      if (Number.isNaN(product) || Number.isNaN(count)) {
         setStatus("pi-status", "Bitte beide Felder ausfüllen.", "#ad1457");
         return;
       }
 
       const expectedProduct = 3 * piDiameter;
-      if (whole === 3 && product === expectedProduct) {
+      if (product === expectedProduct && count === piTargetSticks) {
         piStreak += 1;
         celebrate();
         setStatus(
           "pi-status",
-          `Richtig! 3 ganze Bänder und 3 × ${piDiameter} = ${expectedProduct}. π ist größer als 3, weil ein Rest bleibt. Serie: ${piStreak}`,
+          `Richtig! 3 × ${piDiameter} = ${expectedProduct} und dein Zaun braucht ${piTargetSticks} Stäbe. Der Kreis braucht also mehr als 3 × d. Serie: ${piStreak}`,
           "#1b5e20"
         );
-        if (piDiameter % 7 === 0) {
-          const approx = (piDiameter / 7) * 22;
-          document.getElementById("pi-note").textContent =
-            `Merksatz: Für d = ${piDiameter} ist der Umfang ungefähr ${approx} (mit 22 zu 7).`;
-        }
+        document.getElementById("pi-note").textContent =
+          "Merksatz: Der Kreisumfang ist mehr als 3 × d. Diese „mehr-als-3-Zahl“ nennt man π.";
         setTimeout(newPiProblem, 1800);
       } else {
         piStreak = 0;
         setStatus(
           "pi-status",
-          `Noch nicht ganz. Ganze Bänder sind 3 und 3 × ${piDiameter} ist ${expectedProduct}.`,
+          `Noch nicht ganz. 3 × ${piDiameter} = ${expectedProduct} und der Zaun braucht ${piTargetSticks} Stäbe.`,
           "#ad1457"
         );
       }
