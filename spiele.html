@@ -546,6 +546,7 @@
     let subdivideSelected = new Set();
     let triangulationFigureTriangles = [];
     let triangulationFigureTriangleSet = new Set();
+    let triangulationFigureSquareRequirements = new Map();
     let triangulationPlacedTriangles = [];
     let triangulationPlacedTriangleSet = new Set();
     let triangulationSelectedPoints = [];
@@ -1313,12 +1314,134 @@
       };
     }
 
+    function buildTriangulationSquareRequirements(triangles) {
+      const grouped = new Map();
+      triangles.forEach((triangle) => {
+        if (!grouped.has(triangle.squareKey)) grouped.set(triangle.squareKey, []);
+        grouped.get(triangle.squareKey).push(triangle.omittedCorner);
+      });
+
+      const requirements = new Map();
+      grouped.forEach((omittedCorners, squareKey) => {
+        if (omittedCorners.length === 1) {
+          requirements.set(squareKey, {
+            type: "single",
+            omittedCorner: omittedCorners[0]
+          });
+          return;
+        }
+
+        if (
+          omittedCorners.length === 2 &&
+          triangulationOmittedCornersAreComplementary(omittedCorners[0], omittedCorners[1])
+        ) {
+          requirements.set(squareKey, { type: "full" });
+          return;
+        }
+
+        // Fallback: treat unexpected combinations as fixed single triangles.
+        requirements.set(squareKey, {
+          type: "fixed-set",
+          omittedCorners: new Set(omittedCorners)
+        });
+      });
+
+      return requirements;
+    }
+
+    function getPlacedTriangulationBySquare() {
+      const grouped = new Map();
+      triangulationPlacedTriangles.forEach((triangle) => {
+        if (!grouped.has(triangle.squareKey)) grouped.set(triangle.squareKey, []);
+        grouped.get(triangle.squareKey).push(triangle);
+      });
+      return grouped;
+    }
+
+    function validateTriangulationCandidate(candidate) {
+      const requirement = triangulationFigureSquareRequirements.get(candidate.squareKey);
+      if (!requirement) {
+        return { ok: false, error: "Dieses Dreieck gehört nicht zur Figur." };
+      }
+
+      const placedBySquare = getPlacedTriangulationBySquare();
+      const existing = placedBySquare.get(candidate.squareKey) || [];
+
+      if (requirement.type === "single") {
+        if (candidate.omittedCorner !== requirement.omittedCorner) {
+          return { ok: false, error: "In diesem Feld passt nur die andere Dreieckshälfte." };
+        }
+        if (existing.length > 0) {
+          return { ok: false, error: "Dieses Dreieck ist schon gesetzt." };
+        }
+        return { ok: true };
+      }
+
+      if (requirement.type === "full") {
+        if (existing.length === 0) {
+          return { ok: true };
+        }
+        if (existing.length >= 2) {
+          return { ok: false, error: "Dieses Quadrat ist schon komplett bedeckt." };
+        }
+        const first = existing[0];
+        if (first.omittedCorner === candidate.omittedCorner) {
+          return { ok: false, error: "Dieses Dreieck ist schon gesetzt." };
+        }
+        if (!triangulationOmittedCornersAreComplementary(first.omittedCorner, candidate.omittedCorner)) {
+          return { ok: false, error: "Die zweite Hälfte muss zur ersten Hälfte passen." };
+        }
+        return { ok: true };
+      }
+
+      if (requirement.type === "fixed-set") {
+        if (!requirement.omittedCorners.has(candidate.omittedCorner)) {
+          return { ok: false, error: "Dieses Dreieck gehört nicht zur Figur." };
+        }
+        if (existing.some((triangle) => triangle.omittedCorner === candidate.omittedCorner)) {
+          return { ok: false, error: "Dieses Dreieck ist schon gesetzt." };
+        }
+        return { ok: true };
+      }
+
+      return { ok: false, error: "Dieses Dreieck gehört nicht zur Figur." };
+    }
+
     function isTriangulationCovered() {
       if (triangulationFigureTriangles.length === 0) return false;
-      if (triangulationPlacedTriangleSet.size !== triangulationFigureTriangleSet.size) return false;
-      return triangulationFigureTriangles.every((triangle) =>
-        triangulationPlacedTriangleSet.has(triangulationTriangleKey(triangle))
-      );
+      if (triangulationPlacedTriangles.length !== triangulationExpectedTriangles) return false;
+
+      const placedBySquare = getPlacedTriangulationBySquare();
+      if (placedBySquare.size !== triangulationFigureSquareRequirements.size) return false;
+
+      for (const [squareKey, requirement] of triangulationFigureSquareRequirements.entries()) {
+        const placed = placedBySquare.get(squareKey) || [];
+        if (requirement.type === "single") {
+          if (placed.length !== 1) return false;
+          if (placed[0].omittedCorner !== requirement.omittedCorner) return false;
+          continue;
+        }
+
+        if (requirement.type === "full") {
+          if (placed.length !== 2) return false;
+          if (!triangulationOmittedCornersAreComplementary(placed[0].omittedCorner, placed[1].omittedCorner)) return false;
+          continue;
+        }
+
+        if (requirement.type === "fixed-set") {
+          if (placed.length !== requirement.omittedCorners.size) return false;
+          const uniquePlaced = new Set(placed.map((triangle) => triangle.omittedCorner));
+          if (uniquePlaced.size !== placed.length) return false;
+          for (const omittedCorner of uniquePlaced) {
+            if (!requirement.omittedCorners.has(omittedCorner)) return false;
+          }
+          continue;
+        }
+
+        return false;
+      }
+
+      return true;
     }
 
     function getTriangulationBoundaryEdges() {
@@ -1456,14 +1579,15 @@
       }
 
       const candidateKey = triangulationTriangleKey(candidate);
-      if (!triangulationFigureTriangleSet.has(candidateKey)) {
-        setStatus("triangulation-status", "Dieses Dreieck gehört nicht zur Figur.", "#ad1457");
+      if (triangulationPlacedTriangleSet.has(candidateKey)) {
+        setStatus("triangulation-status", "Dieses Dreieck ist schon gesetzt.", "#ad1457");
         renderTriangulationBoard();
         return;
       }
 
-      if (triangulationPlacedTriangleSet.has(candidateKey)) {
-        setStatus("triangulation-status", "Dieses Dreieck ist schon gesetzt.", "#ad1457");
+      const candidateValidation = validateTriangulationCandidate(candidate);
+      if (!candidateValidation.ok) {
+        setStatus("triangulation-status", candidateValidation.error, "#ad1457");
         renderTriangulationBoard();
         return;
       }
@@ -1526,6 +1650,7 @@
       triangulationFigureTriangleSet = new Set(
         triangulationFigureTriangles.map((triangle) => triangulationTriangleKey(triangle))
       );
+      triangulationFigureSquareRequirements = buildTriangulationSquareRequirements(triangulationFigureTriangles);
       triangulationPlacedTriangles = [];
       triangulationPlacedTriangleSet = new Set();
       triangulationSelectedPoints = [];
