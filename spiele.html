@@ -1538,13 +1538,21 @@
             (point) => point.x === x && point.y === y
           );
           const center = toPx({ x, y });
+          const hitArea = document.createElementNS(svgNS, "circle");
+          hitArea.setAttribute("cx", String(center.x));
+          hitArea.setAttribute("cy", String(center.y));
+          hitArea.setAttribute("r", isSelected ? "12.6" : "11.2");
+          hitArea.setAttribute("fill", "rgba(0, 0, 0, 0)");
+          hitArea.style.cursor = "pointer";
+          hitArea.addEventListener("click", () => handleTriangulationPointClick(x, y));
+          svg.appendChild(hitArea);
+
           const dot = document.createElementNS(svgNS, "circle");
           dot.setAttribute("cx", String(center.x));
           dot.setAttribute("cy", String(center.y));
           dot.setAttribute("r", isSelected ? "5.2" : "3.1");
           dot.setAttribute("fill", isSelected ? "#d81b60" : "#b87494");
-          dot.style.cursor = "pointer";
-          dot.addEventListener("click", () => handleTriangulationPointClick(x, y));
+          dot.setAttribute("pointer-events", "none");
           svg.appendChild(dot);
         }
       }
